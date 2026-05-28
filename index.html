@@ -1,0 +1,884 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Thái Hoà — Quản lý ca</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#f0f0eb;min-height:100vh;color:#1a1a1a}
+.app{max-width:440px;margin:0 auto;background:#fff;min-height:100vh;padding-bottom:80px}
+.screen{display:none}.screen.active{display:block}
+/* HEADER */
+.hdr{background:#fff;border-bottom:1px solid #e8e8e4;padding:12px 16px;position:sticky;top:0;z-index:10}
+.hdr-row{display:flex;align-items:center;justify-content:space-between}
+.hdr-title{font-size:15px;font-weight:700;color:#1a1a1a}
+.hdr-sub{font-size:11px;color:#888;margin-top:1px}
+.chip{display:flex;align-items:center;gap:6px;padding:4px 10px 4px 6px;background:#f5f5f0;border-radius:20px}
+.av{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0}
+.av-admin{background:#FAEEDA;color:#854F0B}
+.av-ca{background:#EEEDFE;color:#3C3489}
+.av-kho{background:#E1F5EE;color:#0F6E56}
+.av-thu{background:#E6F1FB;color:#185FA5}
+.chip-name{font-size:12px;color:#555;font-weight:500}
+/* LOGIN */
+.login-wrap{padding:36px 20px 20px;text-align:center}
+.login-icon{font-size:56px;margin-bottom:12px}
+.login-title{font-size:28px;font-weight:800;color:#1a1a1a;letter-spacing:-0.5px}
+.login-sub{font-size:13px;color:#888;margin-top:6px;margin-bottom:28px}
+.login-card{background:#fff;border:1px solid #e8e8e4;border-radius:14px;padding:20px}
+label{display:block;font-size:12px;color:#666;font-weight:600;margin-bottom:6px}
+select,input{width:100%;padding:11px 12px;border:1px solid #ddd;border-radius:8px;font-size:14px;background:#fff;color:#1a1a1a;outline:none;font-family:inherit;-webkit-appearance:none}
+select:focus,input:focus{border-color:#1D9E75;box-shadow:0 0 0 3px rgba(29,158,117,0.08)}
+.pin-disp{background:#f5f5f0;border-radius:10px;padding:14px;text-align:center;font-size:28px;letter-spacing:14px;min-height:58px;margin:14px 0 10px;border:1px solid #e8e8e4;color:#1a1a1a;font-weight:700}
+.pin-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px}
+.pb{padding:16px 0;border:1px solid #e8e8e4;border-radius:10px;background:#f9f9f7;font-size:20px;font-weight:600;cursor:pointer;color:#1a1a1a;text-align:center;user-select:none;transition:transform 0.1s}
+.pb:active{transform:scale(0.93)}
+.pb-ok{background:#1D9E75;color:#fff;border-color:#1D9E75;font-size:13px;font-weight:700}
+.pb-del{font-size:13px;color:#666}
+.err{font-size:12px;color:#E24B4A;text-align:center;margin-top:6px;min-height:16px}
+/* BUTTONS */
+.btn{width:100%;padding:13px;border:none;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;transition:all 0.15s}
+.btn-green{background:#1D9E75;color:#fff}.btn-green:hover{background:#0F6E56}
+.btn-green:disabled{background:#ccc;cursor:not-allowed}
+.btn-outline{background:transparent;border:1px solid #ddd;color:#555}.btn-outline:hover{background:#f5f5f0}
+.btn-red{background:#E24B4A;color:#fff}
+.btn-sm{padding:5px 12px;font-size:11px;border-radius:6px;border:1px solid #ddd;background:transparent;cursor:pointer;color:#555;font-weight:500;font-family:inherit}
+.btn-sm:hover{background:#f5f5f0}
+/* LAYOUT */
+.pad{padding:16px}
+.card{background:#fff;border:1px solid #e8e8e4;border-radius:12px;padding:16px;margin-bottom:12px}
+.section-title{font-size:11px;font-weight:700;color:#aaa;letter-spacing:0.5px;text-transform:uppercase;margin:0 16px 8px;padding-top:4px}
+/* MENU CARDS */
+.mc{border:1px solid #e8e8e4;border-radius:12px;padding:15px 16px;margin:0 16px 10px;cursor:pointer;display:flex;align-items:center;gap:14px;background:#fff;transition:all 0.15s}
+.mc:hover{border-color:#ccc;background:#fafaf8}
+.mc-icon{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
+.mc-green{background:#E1F5EE}.mc-blue{background:#E6F1FB}.mc-amber{background:#FAEEDA}.mc-red{background:#FCEBEB}.mc-purple{background:#EEEDFE}
+.mc-body{flex:1}
+.mc-title{font-size:14px;font-weight:700;color:#1a1a1a}
+.mc-sub{font-size:12px;color:#888;margin-top:2px}
+.mc-badge{font-size:10px;font-weight:600;padding:2px 8px;border-radius:10px;margin-top:4px;display:inline-block}
+.badge-done{background:#EAF3DE;color:#3B6D11}
+.badge-pending{background:#FAEEDA;color:#854F0B}
+.mc-arr{font-size:18px;color:#ccc;flex-shrink:0}
+/* CHECKLIST */
+.cl-wrap{padding:0 16px}
+.cl-item{display:flex;align-items:flex-start;gap:10px;padding:11px 13px;border:1px solid #e8e8e4;border-radius:8px;background:#fff;margin-bottom:6px;cursor:pointer;transition:background 0.1s}
+.cl-item:hover{background:#fafaf8}
+.cl-item.done{background:#f8fcf9;border-color:#c8e8d8}
+.cl-circle{width:22px;height:22px;border-radius:50%;border:2px solid #ddd;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;font-size:12px;color:#fff;transition:all 0.2s}
+.cl-item.done .cl-circle{background:#1D9E75;border-color:#1D9E75}
+.cl-item.done .cl-text{color:#999;text-decoration:line-through}
+.cl-text{font-size:13px;color:#1a1a1a;line-height:1.5;flex:1}
+.cl-pts{font-size:11px;color:#aaa;margin-top:2px}
+/* PROGRESS */
+.prog-wrap{margin:0 16px 12px;background:#f5f5f0;border-radius:12px;padding:12px 14px;border:1px solid #e8e8e4}
+.prog-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.prog-label{font-size:12px;color:#666;font-weight:600}
+.prog-score{font-size:14px;font-weight:700;color:#1D9E75}
+.prog-track{height:8px;background:#fff;border-radius:4px;border:1px solid #e8e8e4;overflow:hidden}
+.prog-fill{height:100%;background:#1D9E75;border-radius:4px;transition:width 0.4s}
+/* NOTES */
+.notes-section{padding:0 16px 16px}
+textarea{width:100%;padding:10px 12px;border:1px solid #ddd;border-radius:8px;font-size:13px;background:#fff;resize:none;outline:none;font-family:inherit;line-height:1.5;color:#1a1a1a}
+textarea:focus{border-color:#1D9E75}
+/* SUBMIT */
+.submit-area{padding:0 16px 16px}
+/* ADMIN TABS */
+.tab-row{display:flex;gap:6px;padding:12px 16px 0;overflow-x:auto;scrollbar-width:none}
+.tab-row::-webkit-scrollbar{display:none}
+.tab{white-space:nowrap;font-size:12px;padding:7px 14px;border-radius:20px;border:1px solid #e8e8e4;background:#fff;cursor:pointer;color:#666;font-weight:600;font-family:inherit}
+.tab.active{background:#1a1a1a;color:#fff;border-color:#1a1a1a}
+.tc{display:none;padding:14px 16px}.tc.active{display:block}
+/* ADMIN CARDS */
+.day-card{border:1px solid #e8e8e4;border-radius:10px;margin-bottom:8px;overflow:hidden}
+.day-card-hdr{padding:12px 14px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;background:#fff}
+.day-card-hdr:hover{background:#f9f9f7}
+.day-title{font-size:13px;font-weight:700;color:#1a1a1a}
+.day-meta{font-size:11px;color:#888;margin-top:2px}
+.day-count{font-size:11px;font-weight:600;padding:2px 8px;border-radius:10px;background:#E6F1FB;color:#185FA5}
+.day-body{display:none;padding:12px 14px;border-top:1px solid #f0f0ec}
+.rep-item{padding:9px 0;border-bottom:1px solid #f0f0ec}
+.rep-item:last-child{border-bottom:none}
+.rep-name{font-size:13px;font-weight:700;color:#1a1a1a}
+.rep-meta{font-size:11px;color:#888;margin-top:2px;line-height:1.6}
+.sco-badge{font-size:11px;padding:2px 8px;border-radius:10px;font-weight:700;display:inline-block}
+.sco-green{background:#EAF3DE;color:#3B6D11}
+.sco-yellow{background:#FAEEDA;color:#854F0B}
+.sco-red{background:#FCEBEB;color:#A32D2D}
+/* VIOLATION */
+.vio-item{border:1px solid #e8e8e4;border-radius:10px;padding:12px;margin-bottom:8px;background:#fff}
+.vio-top{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
+.vio-name{font-size:13px;font-weight:700}
+.vio-meta{font-size:11px;color:#888;margin-top:2px;line-height:1.6}
+.status-badge{font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;white-space:nowrap;flex-shrink:0}
+.sb-pending{background:#FAEEDA;color:#854F0B}
+.sb-approved{background:#EAF3DE;color:#3B6D11}
+.sb-rejected{background:#f0f0f0;color:#888}
+/* ORDER */
+.order-row{display:flex;gap:6px;margin-bottom:6px;align-items:flex-start}
+.order-row input{flex:2;padding:9px 10px;border:1px solid #ddd;border-radius:8px;font-size:13px;outline:none;font-family:inherit}
+.order-row input:focus{border-color:#1D9E75}
+.order-row input.qty{flex:1;min-width:60px}
+.order-row select{flex:1;min-width:90px;padding:9px 8px;border:1px solid #ddd;border-radius:8px;font-size:12px;outline:none;font-family:inherit;background:#fff}
+.btn-add-row{width:100%;padding:10px;border:1px dashed #ccc;border-radius:8px;background:transparent;color:#888;font-size:13px;cursor:pointer;margin-top:4px;font-family:inherit}
+.btn-add-row:hover{border-color:#1D9E75;color:#1D9E75}
+.btn-rm{width:28px;height:28px;border-radius:50%;border:1px solid #ddd;background:#fff;color:#aaa;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:4px;line-height:1}
+.btn-rm:hover{border-color:#E24B4A;color:#E24B4A}
+/* SUMMARY TABLE */
+.sum-tbl{width:100%;border-collapse:collapse;font-size:12px}
+.sum-tbl th{padding:9px 10px;background:#f5f5f0;color:#666;font-weight:700;border-bottom:1px solid #e8e8e4;text-align:left;font-size:11px}
+.sum-tbl td{padding:9px 10px;border-bottom:1px solid #f0f0ec;color:#1a1a1a}
+.grade-green{background:#EAF3DE;color:#3B6D11;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:700;display:inline-block}
+.grade-yellow{background:#FAEEDA;color:#854F0B;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:700;display:inline-block}
+.grade-red{background:#FCEBEB;color:#A32D2D;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:700;display:inline-block}
+/* PIN */
+.pin-item{display:flex;align-items:center;justify-content:space-between;padding:11px 0;border-bottom:1px solid #f0f0ec}
+.pin-item:last-child{border-bottom:none}
+.pi-name{font-size:13px;font-weight:700}
+.pi-role{font-size:11px;color:#888;margin-top:2px}
+.role-tag{font-size:10px;padding:2px 8px;border-radius:10px;font-weight:700;display:inline-block}
+.rt-admin{background:#FAEEDA;color:#854F0B}
+.rt-ca{background:#EEEDFE;color:#3C3489}
+.rt-kho{background:#E1F5EE;color:#0F6E56}
+.rt-thu{background:#E6F1FB;color:#185FA5}
+/* MODAL */
+.modal-ov{position:fixed;inset:0;background:rgba(0,0,0,0.5);display:none;align-items:center;justify-content:center;z-index:200;padding:20px}
+.modal-ov.open{display:flex}
+.modal{background:#fff;border-radius:16px;padding:22px;width:100%;max-width:320px}
+.modal-title{font-size:16px;font-weight:700;margin-bottom:16px}
+/* BOTTOM NAV */
+.bnav{position:fixed;bottom:0;left:0;right:0;max-width:440px;margin:0 auto;background:#fff;border-top:1px solid #e8e8e4;display:flex;z-index:100}
+.nav-btn{flex:1;padding:10px 4px 14px;text-align:center;cursor:pointer;font-size:10px;color:#aaa;font-weight:600;font-family:inherit;border:none;background:transparent}
+.nav-btn .ni{font-size:22px;display:block;margin-bottom:3px}
+.nav-btn.active{color:#1D9E75}
+/* DONE */
+.done-wrap{text-align:center;padding:60px 24px}
+.done-icon{font-size:64px;margin-bottom:16px}
+.done-title{font-size:22px;font-weight:800;color:#1a1a1a;margin-bottom:8px}
+.done-score{font-size:16px;font-weight:700;color:#1D9E75;margin-bottom:6px}
+.done-detail{font-size:13px;color:#666;margin-bottom:20px;line-height:1.6}
+.warn-box{background:#FAEEDA;border-radius:10px;padding:12px;margin:12px 0;font-size:12px;color:#854F0B;border:1px solid #FAC775;text-align:left}
+.info-box{background:#E6F1FB;border-radius:8px;padding:10px 12px;font-size:12px;color:#185FA5;margin-bottom:12px;border:1px solid #85B7EB;line-height:1.6}
+.empty{text-align:center;padding:32px;color:#aaa;font-size:13px}
+.hint{font-size:11px;color:#aaa;text-align:center;margin-top:8px}
+/* LOADING */
+.loading{text-align:center;padding:120px 20px}
+.spin{width:36px;height:36px;border:3px solid #e8e8e4;border-top-color:#1D9E75;border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto 12px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.vio-form-wrap{background:#f9f9f7;border-radius:10px;border:1px solid #e8e8e4;padding:14px;margin-bottom:12px}
+</style>
+</head>
+<body>
+<div class="app">
+
+<!-- LOADING -->
+<div class="screen active" id="sc-loading">
+  <div class="loading"><div class="spin"></div><div style="font-size:13px;color:#888">Đang kết nối...</div></div>
+</div>
+
+<!-- LOGIN -->
+<div class="screen" id="sc-login">
+  <div class="login-wrap">
+    <div class="login-icon">🏪</div>
+    <div class="login-title">Thái Hoà</div>
+    <div class="login-sub">Hệ thống quản lý nội bộ</div>
+  </div>
+  <div class="pad" style="padding-top:0">
+    <div class="login-card">
+      <div style="margin-bottom:14px"><label>Chọn nhân viên</label><select id="sel-user"><option value="">-- Chọn tên --</option></select></div>
+      <label>Nhập PIN (4 số)</label>
+      <div class="pin-disp" id="pin-disp">────</div>
+      <div class="pin-grid">
+        <button class="pb" onclick="pp('1')">1</button><button class="pb" onclick="pp('2')">2</button><button class="pb" onclick="pp('3')">3</button>
+        <button class="pb" onclick="pp('4')">4</button><button class="pb" onclick="pp('5')">5</button><button class="pb" onclick="pp('6')">6</button>
+        <button class="pb" onclick="pp('7')">7</button><button class="pb" onclick="pp('8')">8</button><button class="pb" onclick="pp('9')">9</button>
+        <button class="pb pb-del" onclick="pp('del')">⌫</button><button class="pb" onclick="pp('0')">0</button><button class="pb pb-ok" onclick="doLogin()">Vào ›</button>
+      </div>
+      <div class="err" id="login-err"></div>
+      <div class="hint">PIN mặc định: 1234</div>
+    </div>
+  </div>
+</div>
+
+<!-- TRƯỞNG CA MENU -->
+<div class="screen" id="sc-ca-menu">
+  <div class="hdr"><div class="hdr-row">
+    <div><div class="hdr-title">Nhiệm vụ hôm nay</div><div class="hdr-sub" id="ca-menu-date"></div></div>
+    <div class="chip"><div class="av av-ca" id="ca-menu-av">TC</div><span class="chip-name" id="ca-menu-name"></span></div>
+  </div></div>
+  <div style="height:14px"></div>
+  <div class="section-title">CA LÀM VIỆC</div>
+  <div class="mc" onclick="openCaCL('mo')"><div class="mc-icon mc-green">☀️</div><div class="mc-body"><div class="mc-title">Mở ca</div><div class="mc-sub">Nhận quỹ, bật thiết bị, điểm danh</div><div class="mc-badge badge-pending" id="badge-mo">Chưa hoàn thành</div></div><div class="mc-arr">›</div></div>
+  <div class="mc" onclick="openCaCL('trong')"><div class="mc-icon mc-blue">🔄</div><div class="mc-body"><div class="mc-title">Trong ca</div><div class="mc-sub">Kiểm tra vị trí, kệ hàng, hỗ trợ</div><div class="mc-badge badge-pending" id="badge-trong">Chưa hoàn thành</div></div><div class="mc-arr">›</div></div>
+  <div class="mc" onclick="openCaCL('dong')"><div class="mc-icon mc-amber">🌙</div><div class="mc-body"><div class="mc-title">Đóng ca & Bàn giao</div><div class="mc-sub">Đếm tiền, bàn giao, khoá cửa</div><div class="mc-badge badge-pending" id="badge-dong">Chưa hoàn thành</div></div><div class="mc-arr">›</div></div>
+  <div style="height:8px"></div>
+  <div class="section-title">BÁO CÁO</div>
+  <div class="mc" onclick="showSc('sc-vio-form')"><div class="mc-icon mc-red">⚠️</div><div class="mc-body"><div class="mc-title">Báo cáo sự cố / Vi phạm</div><div class="mc-sub">Ghi nhận vi phạm hoặc khiếu nại</div></div><div class="mc-arr">›</div></div>
+</div>
+
+<!-- CA CHECKLIST -->
+<div class="screen" id="sc-ca-cl">
+  <div class="hdr"><div class="hdr-row">
+    <button onclick="showSc('sc-ca-menu')" style="background:none;border:none;cursor:pointer;font-size:20px;color:#666;padding:0 10px 0 0;line-height:1">‹</button>
+    <div style="flex:1"><div class="hdr-title" id="ca-cl-title"></div><div class="hdr-sub" id="ca-cl-sub"></div></div>
+  </div></div>
+  <div style="height:12px"></div>
+  <div class="prog-wrap"><div class="prog-top"><span class="prog-label">Tiến độ</span><span class="prog-score" id="ca-prog-score">0 điểm</span></div><div class="prog-track"><div class="prog-fill" id="ca-prog-fill" style="width:0%"></div></div></div>
+  <div class="cl-wrap" id="ca-cl-items"></div>
+  <div class="notes-section"><label>Ghi chú ca (nếu có)</label><textarea id="ca-notes" rows="3" placeholder="Ghi nhận tình trạng, sự cố, bàn giao..."></textarea></div>
+  <div class="submit-area"><button class="btn btn-green" id="ca-submit-btn" onclick="submitCa()" disabled>Nộp báo cáo ca</button></div>
+</div>
+
+<!-- TRƯỞNG KHO MENU -->
+<div class="screen" id="sc-kho-menu">
+  <div class="hdr"><div class="hdr-row">
+    <div><div class="hdr-title">Nhiệm vụ kho</div><div class="hdr-sub" id="kho-menu-date"></div></div>
+    <div class="chip"><div class="av av-kho">TK</div><span class="chip-name" id="kho-menu-name"></span></div>
+  </div></div>
+  <div style="height:14px"></div>
+  <div class="section-title">KIỂM KHO</div>
+  <div class="mc" onclick="openKhoCL('ngay')"><div class="mc-icon mc-green">📦</div><div class="mc-body"><div class="mc-title">Kiểm hàng ngày</div><div class="mc-sub">10 mã xoay vòng, top 5 bán chạy</div><div class="mc-badge badge-pending" id="kbadge-ngay">Chưa hoàn thành</div></div><div class="mc-arr">›</div></div>
+  <div class="mc" onclick="openKhoCL('tuan')"><div class="mc-icon mc-blue">📊</div><div class="mc-body"><div class="mc-title">Kiểm hàng tuần</div><div class="mc-sub">Sữa không PG, spot-check, Mẹ & Bé</div><div class="mc-badge badge-pending" id="kbadge-tuan">Chưa hoàn thành</div></div><div class="mc-arr">›</div></div>
+  <div class="mc" onclick="openKhoCL('thang')"><div class="mc-icon mc-purple">🗂️</div><div class="mc-body"><div class="mc-title">Kiểm tháng</div><div class="mc-sub">Nhóm A/B/C, đối chiếu KiotViet</div><div class="mc-badge badge-pending" id="kbadge-thang">Chưa hoàn thành</div></div><div class="mc-arr">›</div></div>
+  <div class="mc" onclick="openKhoCL('nhanhang')"><div class="mc-icon mc-amber">🚚</div><div class="mc-body"><div class="mc-title">Nhận hàng NCC</div><div class="mc-sub">Đếm, kiểm date, ký biên bản</div><div class="mc-badge badge-pending" id="kbadge-nhanhang">Chưa hoàn thành</div></div><div class="mc-arr">›</div></div>
+  <div style="height:8px"></div>
+  <div class="section-title">ĐỀ XUẤT</div>
+  <div class="mc" onclick="initOrderForm();showSc('sc-order-form')"><div class="mc-icon mc-green">➕</div><div class="mc-body"><div class="mc-title">Đề xuất nhập hàng</div><div class="mc-sub">Báo hàng cần nhập cho admin</div></div><div class="mc-arr">›</div></div>
+</div>
+
+<!-- KHO CHECKLIST -->
+<div class="screen" id="sc-kho-cl">
+  <div class="hdr"><div class="hdr-row">
+    <button onclick="showSc('sc-kho-menu')" style="background:none;border:none;cursor:pointer;font-size:20px;color:#666;padding:0 10px 0 0;line-height:1">‹</button>
+    <div style="flex:1"><div class="hdr-title" id="kho-cl-title"></div><div class="hdr-sub" id="kho-cl-sub"></div></div>
+  </div></div>
+  <div style="height:12px"></div>
+  <div class="prog-wrap"><div class="prog-top"><span class="prog-label">Tiến độ</span><span class="prog-score" id="kho-prog-score">0 điểm</span></div><div class="prog-track"><div class="prog-fill" id="kho-prog-fill" style="width:0%"></div></div></div>
+  <div class="cl-wrap" id="kho-cl-items"></div>
+  <div class="notes-section"><label>Ghi chú (nếu có)</label><textarea id="kho-notes" rows="3" placeholder="Ghi nhận tình trạng hàng, lệch kho..."></textarea></div>
+  <div class="submit-area"><button class="btn btn-green" id="kho-submit-btn" onclick="submitKho()" disabled>Nộp báo cáo kho</button></div>
+</div>
+
+<!-- THU NGÂN MENU -->
+<div class="screen" id="sc-thu-menu">
+  <div class="hdr"><div class="hdr-row">
+    <div><div class="hdr-title">Nhiệm vụ hôm nay</div><div class="hdr-sub" id="thu-menu-date"></div></div>
+    <div class="chip"><div class="av av-thu">TN</div><span class="chip-name" id="thu-menu-name"></span></div>
+  </div></div>
+  <div style="height:14px"></div>
+  <div class="section-title">CA LÀM VIỆC</div>
+  <div class="mc" onclick="openThuCL('mo')"><div class="mc-icon mc-green">☀️</div><div class="mc-body"><div class="mc-title">Mở ca thu ngân</div><div class="mc-sub">Nhận quỹ, kiểm máy POS, chuẩn bị</div><div class="mc-badge badge-pending" id="thbadge-mo">Chưa hoàn thành</div></div><div class="mc-arr">›</div></div>
+  <div class="mc" onclick="openThuCL('trong')"><div class="mc-icon mc-blue">🔄</div><div class="mc-body"><div class="mc-title">Trong ca thu ngân</div><div class="mc-sub">Đối chiếu doanh thu, xử lý hoàn trả</div><div class="mc-badge badge-pending" id="thbadge-trong">Chưa hoàn thành</div></div><div class="mc-arr">›</div></div>
+  <div class="mc" onclick="openThuCL('dong')"><div class="mc-icon mc-amber">🌙</div><div class="mc-body"><div class="mc-title">Đóng ca thu ngân</div><div class="mc-sub">Đếm tiền, báo cáo KiotViet, bàn giao</div><div class="mc-badge badge-pending" id="thbadge-dong">Chưa hoàn thành</div></div><div class="mc-arr">›</div></div>
+</div>
+
+<!-- THU NGÂN CHECKLIST -->
+<div class="screen" id="sc-thu-cl">
+  <div class="hdr"><div class="hdr-row">
+    <button onclick="showSc('sc-thu-menu')" style="background:none;border:none;cursor:pointer;font-size:20px;color:#666;padding:0 10px 0 0;line-height:1">‹</button>
+    <div style="flex:1"><div class="hdr-title" id="thu-cl-title"></div><div class="hdr-sub" id="thu-cl-sub"></div></div>
+  </div></div>
+  <div style="height:12px"></div>
+  <div class="prog-wrap"><div class="prog-top"><span class="prog-label">Tiến độ</span><span class="prog-score" id="thu-prog-score">0 điểm</span></div><div class="prog-track"><div class="prog-fill" id="thu-prog-fill" style="width:0%"></div></div></div>
+  <div class="cl-wrap" id="thu-cl-items"></div>
+  <div class="notes-section"><label>Ghi chú (nếu có)</label><textarea id="thu-notes" rows="3" placeholder="Ghi nhận sự cố, chênh lệch tiền..."></textarea></div>
+  <div class="submit-area"><button class="btn btn-green" id="thu-submit-btn" onclick="submitThu()" disabled>Nộp báo cáo ca</button></div>
+</div>
+
+<!-- VI PHẠM FORM -->
+<div class="screen" id="sc-vio-form">
+  <div class="hdr"><div class="hdr-row">
+    <button onclick="showSc('sc-ca-menu')" style="background:none;border:none;cursor:pointer;font-size:20px;color:#666;padding:0 10px 0 0;line-height:1">‹</button>
+    <div><div class="hdr-title">Báo cáo sự cố</div><div class="hdr-sub">Ghi nhận vi phạm / khiếu nại</div></div>
+  </div></div>
+  <div class="pad">
+    <div class="vio-form-wrap">
+      <div style="font-size:13px;font-weight:700;margin-bottom:12px;color:#1a1a1a">📝 Thêm báo cáo mới</div>
+      <div style="margin-bottom:10px"><label>Loại báo cáo</label><select id="vio-type"><option value="violation">⚠️ Vi phạm nhân viên</option><option value="complaint">😤 Khiếu nại khách hàng</option><option value="incident">🔧 Sự cố thiết bị / cửa hàng</option></select></div>
+      <div style="margin-bottom:10px"><label>Nhân viên liên quan (nếu có)</label><select id="vio-nv"><option value="">-- Không có --</option></select></div>
+      <div style="margin-bottom:10px"><label>Mô tả chi tiết</label><textarea id="vio-desc" rows="4" placeholder="Mô tả sự việc, thời gian xảy ra, mức độ..."></textarea></div>
+      <button class="btn btn-red" onclick="submitVio()">🚨 Gửi báo cáo</button>
+    </div>
+  </div>
+</div>
+
+<!-- ORDER FORM -->
+<div class="screen" id="sc-order-form">
+  <div class="hdr"><div class="hdr-row">
+    <button onclick="showSc('sc-kho-menu')" style="background:none;border:none;cursor:pointer;font-size:20px;color:#666;padding:0 10px 0 0;line-height:1">‹</button>
+    <div><div class="hdr-title">Đề xuất nhập hàng</div><div class="hdr-sub">Gửi danh sách cho Admin duyệt</div></div>
+  </div></div>
+  <div class="pad">
+    <div class="info-box">Ghi nhận hàng cần nhập để Admin duyệt và đặt hàng từ NCC.</div>
+    <div id="order-rows"></div>
+    <button class="btn-add-row" onclick="addOrderRow()">+ Thêm mặt hàng</button>
+    <div style="height:14px"></div>
+    <button class="btn btn-green" onclick="submitOrders()">📤 Gửi đề xuất</button>
+  </div>
+</div>
+
+<!-- ADMIN -->
+<div class="screen" id="sc-admin">
+  <div class="hdr"><div class="hdr-row">
+    <div><div class="hdr-title">Thái Hoà — Admin</div><div class="hdr-sub" id="admin-date"></div></div>
+    <div class="chip"><div class="av av-admin">AD</div><span class="chip-name">Admin</span></div>
+  </div></div>
+  <div class="tab-row">
+    <button class="tab active" data-tab="bao-cao" onclick="switchTab(this,'bao-cao')">📋 Báo cáo</button>
+    <button class="tab" data-tab="su-co" onclick="switchTab(this,'su-co')">⚠️ Sự cố</button>
+    <button class="tab" data-tab="nhap-hang" onclick="switchTab(this,'nhap-hang')">📦 Nhập hàng</button>
+    <button class="tab" data-tab="tong-ket" onclick="switchTab(this,'tong-ket')">📊 Tổng kết</button>
+    <button class="tab" data-tab="cai-dat" onclick="switchTab(this,'cai-dat')">⚙️ Cài đặt</button>
+  </div>
+  <div class="tc active" id="tc-bao-cao"><div id="admin-reports-list"><div class="empty">Đang tải...</div></div></div>
+  <div class="tc" id="tc-su-co"><div id="admin-vio-list"><div class="empty">Đang tải...</div></div></div>
+  <div class="tc" id="tc-nhap-hang"><div id="admin-orders-list"><div class="empty">Đang tải...</div></div></div>
+  <div class="tc" id="tc-tong-ket"><div id="admin-summary-list"><div class="empty">Đang tính...</div></div></div>
+  <div class="tc" id="tc-cai-dat">
+    <div class="card"><div style="font-size:13px;font-weight:700;margin-bottom:12px">🔐 Quản lý PIN nhân viên</div><div id="admin-pin-list"></div></div>
+  </div>
+</div>
+
+<!-- DONE -->
+<div class="screen" id="sc-done">
+  <div class="done-wrap">
+    <div class="done-icon" id="done-icon">✅</div>
+    <div class="done-title" id="done-title">Đã nộp!</div>
+    <div class="done-score" id="done-score"></div>
+    <div class="done-detail" id="done-detail"></div>
+    <div class="warn-box" id="done-warn" style="display:none"></div>
+    <button class="btn btn-outline" style="max-width:200px;margin:0 auto" id="done-back-btn">← Về menu</button>
+  </div>
+</div>
+
+<!-- BOTTOM NAV -->
+<nav class="bnav" id="bnav" style="display:none">
+  <button class="nav-btn active" id="nav-home" onclick="navHome()"><span class="ni">✅</span>Nhiệm vụ</button>
+  <button class="nav-btn" id="nav-report" onclick="navAdmin()"><span class="ni">📊</span>Báo cáo</button>
+  <button class="nav-btn" id="nav-logout" onclick="doLogout()"><span class="ni">🚪</span>Đăng xuất</button>
+</nav>
+
+<!-- PIN MODAL -->
+<div class="modal-ov" id="pin-modal">
+  <div class="modal">
+    <div class="modal-title">Đổi PIN — <span id="modal-uname"></span></div>
+    <div style="margin-bottom:10px"><label>PIN mới (4 số)</label><input type="password" id="new-pin" maxlength="4" inputmode="numeric" placeholder="Nhập 4 chữ số"></div>
+    <div class="err" id="pin-err"></div>
+    <div style="display:flex;gap:8px;margin-top:12px">
+      <button class="btn btn-outline" style="flex:1" onclick="closePinModal()">Huỷ</button>
+      <button class="btn btn-green" style="flex:1" onclick="savePIN()">Lưu PIN</button>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+// ================================================================
+// ⚠️  FIREBASE CONFIG — Điền thông tin của bạn vào đây
+//     Vào Firebase Console → Project Settings → Your apps → Web
+// ================================================================
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js';
+import { getDatabase, ref, set, get, push, update } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-database.js';
+
+const firebaseConfig = {
+  apiKey:            "AIzaSyAzaohNm7GqaeUaD5QFygzipk1AyZP9cto",
+  authDomain:        "thai-hoa-shop.firebaseapp.com",
+  databaseURL:       "https://thai-hoa-shop-default-rtdb.firebaseio.com",
+  projectId:         "thai-hoa-shop",
+  storageBucket:     "thai-hoa-shop.firebasestorage.app",
+  messagingSenderId: "644211340132",
+  appId:             "1:644211340132:web:986d80e98be8765874071"
+};
+// ================================================================
+
+const app = initializeApp(firebaseConfig);
+const db  = getDatabase(app);
+
+// ── CHECKLIST DATA ──────────────────────────────────────────────
+const CA_CL = {
+  mo:{title:"Mở ca",emoji:"☀️",items:[
+    {id:"nhan_quy",    t:"Nhận tiền quỹ từ ca trước — đếm thực tế + ký xác nhận",p:10},
+    {id:"bat_thiet_bi",t:"Bật đèn, điều hoà, quạt đúng khu vực quy định",p:5},
+    {id:"kiem_camera", t:"Xác nhận camera hoạt động bình thường",p:5},
+    {id:"kiem_vs",     t:"Kiểm tra vệ sinh: sàn, kệ hàng, quầy thu ngân",p:8},
+    {id:"mo_cua",      t:"Mở cửa đúng giờ — kiểm tra biển giờ mở cửa",p:5},
+    {id:"diem_danh",   t:"Điểm danh nhân viên — phân công vị trí từng người cụ thể",p:10},
+    {id:"nghe_bg",     t:"Nghe báo cáo tình trạng từ ca trước (nếu có)",p:7}
+  ]},
+  trong:{title:"Trong ca",emoji:"🔄",items:[
+    {id:"vt1",        t:"Kiểm tra nhân viên đúng vị trí — lần 1",p:10},
+    {id:"vt2",        t:"Kiểm tra nhân viên đúng vị trí — lần 2",p:10},
+    {id:"hang_kel",   t:"Kiểm kệ trống — báo trưởng kho bổ sung kịp thời",p:8},
+    {id:"vs_giua",    t:"Vệ sinh giữa ca: lau kệ, quét sàn khu bán hàng",p:6},
+    {id:"ho_tro",     t:"Hỗ trợ thu ngân giờ cao điểm khi cần",p:5},
+    {id:"date_check", t:"Kiểm tra hạn sử dụng hàng trên kệ — ưu tiên Mẹ & Bé",p:6}
+  ]},
+  dong:{title:"Đóng ca & Bàn giao",emoji:"🌙",items:[
+    {id:"dem_tien",    t:"Đếm tiền mặt cuối ca — đối chiếu KiotViet",p:12},
+    {id:"ghi_lech",    t:"Ghi nhận chênh lệch nếu có — không tự xử lý, báo admin",p:8},
+    {id:"bc_hang",     t:"Báo cáo danh sách hàng cần nhập cho trưởng kho",p:6},
+    {id:"ban_giao",    t:"Bàn giao trực tiếp cho ca sau — ký xác nhận 2 chiều",p:10},
+    {id:"tat_thiet_bi",t:"Tắt điều hoà, quạt, bảng hiệu — kiểm toàn bộ công tắc",p:8},
+    {id:"khoa_cua",    t:"Kiểm tra khoá cửa chính, cửa sổ, cửa kho",p:8},
+    {id:"ghi_su_co",   t:"Ghi nhận sự cố tồn đọng chưa xử lý (nếu có)",p:5}
+  ]}
+};
+const KHO_CL = {
+  ngay:{title:"Kiểm hàng ngày",emoji:"📦",items:[
+    {id:"k_xoay", t:"10 mã xoay vòng hôm nay (nhóm dễ mất) — đếm cả kệ lẫn kho",p:25},
+    {id:"k_pg",   t:"Xác nhận PG có mặt tại quầy sữa — ghi chú nếu vắng",p:10},
+    {id:"k_top5", t:"Top 5 bán chạy KiotViet — đối chiếu tồn thực tế",p:25},
+    {id:"k_nguong",t:"Ghi nhận mặt hàng tồn dưới ngưỡng cảnh báo",p:20},
+    {id:"k_nhap", t:"Nhập kết quả kiểm vào KiotViet",p:20}
+  ]},
+  tuan:{title:"Kiểm hàng tuần",emoji:"📊",items:[
+    {id:"t_sua",  t:"Sữa không có PG (10+ mã) — kiểm trực tiếp, đối chiếu KiotViet",p:25},
+    {id:"t_spot", t:"Spot-check bất ngờ 3-5 mã sữa có PG — không báo trước",p:15},
+    {id:"t_mebe", t:"Khu Mẹ & Bé: kiểm date hàng + tồn kho toàn khu",p:20},
+    {id:"t_khu",  t:"1 khu cố định theo lịch tuần — đếm đối chiếu KiotViet",p:20},
+    {id:"t_bc",   t:"Tổng hợp báo cáo tuần: lệch, nguyên nhân, đề xuất",p:20}
+  ]},
+  thang:{title:"Kiểm tháng",emoji:"🗂️",items:[
+    {id:"m_a",  t:"Nhóm A (~200 SKU giá trị cao) — 2 người kiểm chéo độc lập",p:25},
+    {id:"m_b",  t:"Nhóm B (~800 SKU) — 1 người đếm, 1 người xác nhận",p:20},
+    {id:"m_c",  t:"Nhóm C — luân phiên từng khu nhỏ (đã rải ngày 1-25)",p:15},
+    {id:"m_dc", t:"Đối chiếu toàn bộ với KiotViet — ghi lệch theo ngưỡng",p:20},
+    {id:"m_pg", t:"PG ký xác nhận số liệu sữa cuối tháng cùng trưởng kho",p:10},
+    {id:"m_bc", t:"Báo cáo tháng nộp admin: lệch tổng, nguyên nhân, đề xuất",p:10}
+  ]},
+  nhanhang:{title:"Nhận hàng NCC",emoji:"🚚",items:[
+    {id:"n_dem",  t:"Đếm số lượng thực tế từng mặt hàng — so với hoá đơn NCC",p:25},
+    {id:"n_date", t:"Kiểm tra date sản xuất + hạn sử dụng toàn bộ lô hàng",p:20},
+    {id:"n_baobi",t:"Kiểm tra tình trạng bao bì — ghi nhận hàng lỗi/hỏng",p:15},
+    {id:"n_ky",   t:"Ký biên bản nhận hàng — ghi rõ số lượng thực nhận",p:20},
+    {id:"n_nhap", t:"Nhập hàng vào KiotViet ngay sau khi kiểm xong",p:20}
+  ]}
+};
+const THU_CL = {
+  mo:{title:"Mở ca thu ngân",emoji:"☀️",items:[
+    {id:"th_quy",    t:"Nhận bàn giao tiền quỹ — đếm thực tế + ký xác nhận",p:15},
+    {id:"th_pos",    t:"Kiểm tra máy POS / thẻ hoạt động bình thường",p:10},
+    {id:"th_hoadon", t:"Kiểm giấy in hoá đơn — thay cuộn mới nếu gần hết",p:10},
+    {id:"th_camera", t:"Xác nhận camera khu thu ngân hoạt động",p:8},
+    {id:"th_kv",     t:"Mở KiotViet, đăng nhập ca mới, kiểm tồn quỹ đầu ca",p:12}
+  ]},
+  trong:{title:"Trong ca thu ngân",emoji:"🔄",items:[
+    {id:"th_doi",    t:"Đối chiếu doanh thu theo giờ với KiotViet",p:20},
+    {id:"th_hoan",   t:"Xử lý hoàn trả / đổi hàng đúng quy trình — có ký xác nhận",p:20},
+    {id:"th_khach",  t:"Hỗ trợ khách đợi lâu — không để khách chờ quá 3 phút",p:15},
+    {id:"th_ket",    t:"Không để tiền mặt trên quầy quá 500k — gửi két định kỳ",p:15}
+  ]},
+  dong:{title:"Đóng ca thu ngân",emoji:"🌙",items:[
+    {id:"th_dem",    t:"Đếm và kiểm tiền mặt cuối ca — phân loại mệnh giá",p:20},
+    {id:"th_in",     t:"In báo cáo doanh thu KiotViet cuối ca",p:15},
+    {id:"th_dc",     t:"Đối chiếu tiền mặt thực tế với doanh thu KiotViet",p:20},
+    {id:"th_lech",   t:"Ghi nhận chênh lệch (nếu có) — báo cáo trưởng ca ngay",p:15},
+    {id:"th_bg",     t:"Bàn giao tiền + báo cáo cho ca sau / admin — ký xác nhận",p:15},
+    {id:"th_close",  t:"Đóng ca KiotViet, đăng xuất máy tính đúng quy trình",p:10}
+  ]}
+};
+
+// ── DEFAULT USERS ───────────────────────────────────────────────
+const DEF_USERS = {
+  admin:      {name:"Admin (Chủ shop)",   role:"admin",      pin:"1234"},
+  tc_sang:    {name:"Trưởng ca sáng",     role:"truong_ca",  pin:"1234"},
+  tc_chieu:   {name:"Trưởng ca chiều",    role:"truong_ca",  pin:"1234"},
+  truong_kho: {name:"Trưởng kho",         role:"truong_kho", pin:"1234"},
+  thu_ngan_1: {name:"Thu ngân 1",         role:"thu_ngan",   pin:"1234"},
+  thu_ngan_2: {name:"Thu ngân 2",         role:"thu_ngan",   pin:"1234"}
+};
+
+// ── STATE ───────────────────────────────────────────────────────
+let CU = null, CP = "", users = {};
+let curCaType = null, curKhoType = null, curThuType = null;
+let caChk = {}, khoChk = {}, thuChk = {};
+let editPinUid = null;
+
+// ── HELPERS ─────────────────────────────────────────────────────
+const today   = () => new Date().toISOString().split('T')[0];
+const timeNow = () => new Date().toLocaleTimeString('vi-VN',{hour:'2-digit',minute:'2-digit'});
+const dateVN  = () => new Date().toLocaleDateString('vi-VN',{weekday:'long',day:'2-digit',month:'2-digit',year:'numeric'});
+
+// ── INIT ────────────────────────────────────────────────────────
+async function init() {
+  showSc('sc-loading');
+  try {
+    const snap = await get(ref(db,'config/users'));
+    users = snap.exists() ? snap.val() : DEF_USERS;
+    if (!snap.exists()) await set(ref(db,'config/users'), DEF_USERS);
+  } catch(e) {
+    users = DEF_USERS;
+    console.warn('Firebase chưa kết nối, dùng dữ liệu mẫu:', e.message);
+  }
+  buildSel(); populateVioNV(); showSc('sc-login');
+}
+
+function buildSel() {
+  const s = document.getElementById('sel-user');
+  s.innerHTML = '<option value="">-- Chọn tên --</option>';
+  Object.entries(users).forEach(([uid,u]) => {
+    const o = document.createElement('option');
+    o.value = uid; o.textContent = u.name + (uid==='admin'?' 👑':'');
+    s.appendChild(o);
+  });
+}
+
+// ── SCREEN NAV ──────────────────────────────────────────────────
+window.showSc = id => {
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0,0);
+};
+function setNav(id) {
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById(id)?.classList.add('active');
+}
+
+// ── LOGIN ───────────────────────────────────────────────────────
+window.pp = v => {
+  if (v==='del') CP = CP.slice(0,-1);
+  else if (CP.length<4) CP += v;
+  document.getElementById('pin-disp').textContent = '●'.repeat(CP.length).padEnd(4,'─');
+  document.getElementById('login-err').textContent = '';
+};
+window.doLogin = () => {
+  const uid = document.getElementById('sel-user').value;
+  if (!uid) { document.getElementById('login-err').textContent='Vui lòng chọn tên nhân viên'; return; }
+  if (CP.length<4) { document.getElementById('login-err').textContent='Vui lòng nhập đủ 4 số PIN'; return; }
+  if (!users[uid] || users[uid].pin !== CP) {
+    document.getElementById('login-err').textContent='❌ PIN không đúng, thử lại!';
+    CP=''; document.getElementById('pin-disp').textContent='────'; return;
+  }
+  CU=uid; CP='';
+  document.getElementById('login-err').textContent='';
+  document.getElementById('pin-disp').textContent='────';
+  document.getElementById('bnav').style.display='flex';
+  navHome();
+};
+
+// ── NAVIGATION ──────────────────────────────────────────────────
+window.navHome = () => {
+  if (!CU) return;
+  const role = users[CU].role;
+  if      (role==='admin')      { loadAdmin(); showSc('sc-admin'); }
+  else if (role==='truong_ca')  { loadCaMenu(); showSc('sc-ca-menu'); }
+  else if (role==='truong_kho') { loadKhoMenu(); showSc('sc-kho-menu'); }
+  else if (role==='thu_ngan')   { loadThuMenu(); showSc('sc-thu-menu'); }
+  setNav('nav-home');
+};
+window.navAdmin = () => { if(!CU) return; loadAdmin(); showSc('sc-admin'); setNav('nav-report'); };
+window.doLogout = () => {
+  CU=null; CP=''; caChk={}; khoChk={}; thuChk={};
+  document.getElementById('bnav').style.display='none';
+  document.getElementById('sel-user').value='';
+  document.getElementById('pin-disp').textContent='────';
+  document.getElementById('login-err').textContent='';
+  showSc('sc-login');
+};
+
+// ── CA MENU ─────────────────────────────────────────────────────
+function loadCaMenu() {
+  const u = users[CU];
+  document.getElementById('ca-menu-date').textContent = dateVN();
+  document.getElementById('ca-menu-name').textContent = u.name;
+  document.getElementById('ca-menu-av').textContent   = u.name.slice(0,2).toUpperCase();
+  ['mo','trong','dong'].forEach(type => {
+    get(ref(db,`reports/${today()}/${CU}/${type}`)).then(snap => {
+      const el = document.getElementById(`badge-${type}`);
+      if (snap.exists()) { el.textContent='✅ Đã hoàn thành'; el.className='mc-badge badge-done'; }
+      else               { el.textContent='Chưa hoàn thành';  el.className='mc-badge badge-pending'; }
+    }).catch(()=>{});
+  });
+}
+
+// ── CA CHECKLIST ────────────────────────────────────────────────
+window.openCaCL = type => {
+  curCaType=type; caChk={};
+  const cl=CA_CL[type];
+  document.getElementById('ca-cl-title').textContent = cl.emoji+' '+cl.title;
+  document.getElementById('ca-cl-sub').textContent   = dateVN()+' · '+users[CU].name;
+  document.getElementById('ca-notes').value='';
+  renderCL('ca-cl-items', cl.items, caChk, updCaP);
+  updCaP(); showSc('sc-ca-cl');
+};
+
+function renderCL(cid, items, chk, onUpdate) {
+  const c = document.getElementById(cid); c.innerHTML='';
+  items.forEach(item => {
+    const d=document.createElement('div');
+    d.className='cl-item'+(chk[item.id]?' done':'');
+    d.innerHTML=`<div class="cl-circle">${chk[item.id]?'✓':''}</div><div><div class="cl-text">${item.t}</div><div class="cl-pts">${item.p} điểm</div></div>`;
+    d.onclick=()=>{ chk[item.id]=!chk[item.id]; d.className='cl-item'+(chk[item.id]?' done':''); d.querySelector('.cl-circle').textContent=chk[item.id]?'✓':''; onUpdate(); };
+    c.appendChild(d);
+  });
+}
+
+function calcScore(items, chk) {
+  const done=items.filter(i=>chk[i.id]).length;
+  const score=items.filter(i=>chk[i.id]).reduce((s,i)=>s+i.p,0);
+  const max=items.reduce((s,i)=>s+i.p,0);
+  return {done,total:items.length,score,max,pct:Math.round(score/max*100)};
+}
+
+function updCaP() {
+  const {done,total,score,max,pct}=calcScore(CA_CL[curCaType].items,caChk);
+  document.getElementById('ca-prog-score').textContent=`${done}/${total} · ${score}đ`;
+  document.getElementById('ca-prog-fill').style.width=pct+'%';
+  document.getElementById('ca-submit-btn').disabled=(done<Math.ceil(total*0.5));
+}
+
+window.submitCa = async () => {
+  const cl=CA_CL[curCaType]; const {score,max,pct}=calcScore(cl.items,caChk);
+  const rep={uid:CU,name:users[CU].name,role:users[CU].role,type:curCaType,caName:cl.title,checked:caChk,score:pct,notes:document.getElementById('ca-notes').value,submittedAt:new Date().toISOString(),time:timeNow()};
+  try {
+    await set(ref(db,`reports/${today()}/${CU}/${curCaType}`),rep);
+    showDone('✅','Đã nộp báo cáo ca!',`${cl.emoji} ${cl.title} — ${pct}%`,`${score}/${max} điểm · ${timeNow()}`,pct<70?'⚠️ Điểm dưới 70% — vui lòng hoàn thành đầy đủ nhiệm vụ hơn!':'','sc-ca-menu');
+    loadCaMenu();
+  } catch(e){alert('Lỗi lưu: '+e.message);}
+};
+
+// ── KHO MENU ────────────────────────────────────────────────────
+function loadKhoMenu() {
+  document.getElementById('kho-menu-date').textContent=dateVN();
+  document.getElementById('kho-menu-name').textContent=users[CU].name;
+  ['ngay','tuan','thang','nhanhang'].forEach(type=>{
+    get(ref(db,`reports/${today()}/${CU}/${type}`)).then(snap=>{
+      const el=document.getElementById(`kbadge-${type}`);
+      if(snap.exists()){el.textContent='✅ Đã hoàn thành';el.className='mc-badge badge-done';}
+      else{el.textContent='Chưa hoàn thành';el.className='mc-badge badge-pending';}
+    }).catch(()=>{});
+  });
+}
+window.openKhoCL = type => {
+  curKhoType=type; khoChk={};
+  const cl=KHO_CL[type];
+  document.getElementById('kho-cl-title').textContent=cl.emoji+' '+cl.title;
+  document.getElementById('kho-cl-sub').textContent=dateVN()+' · '+users[CU].name;
+  document.getElementById('kho-notes').value='';
+  renderCL('kho-cl-items',cl.items,khoChk,updKhoP);
+  updKhoP(); showSc('sc-kho-cl');
+};
+function updKhoP(){
+  const {done,total,score,max,pct}=calcScore(KHO_CL[curKhoType].items,khoChk);
+  document.getElementById('kho-prog-score').textContent=`${done}/${total} · ${score}đ`;
+  document.getElementById('kho-prog-fill').style.width=pct+'%';
+  document.getElementById('kho-submit-btn').disabled=(done<Math.ceil(total*0.5));
+}
+window.submitKho = async () => {
+  const cl=KHO_CL[curKhoType]; const {score,max,pct}=calcScore(cl.items,khoChk);
+  const rep={uid:CU,name:users[CU].name,role:users[CU].role,type:curKhoType,caName:cl.title,checked:khoChk,score:pct,notes:document.getElementById('kho-notes').value,submittedAt:new Date().toISOString(),time:timeNow()};
+  try {
+    await set(ref(db,`reports/${today()}/${CU}/${curKhoType}`),rep);
+    showDone('📦','Đã nộp báo cáo kho!',`${cl.emoji} ${cl.title} — ${pct}%`,`${score}/${max} điểm · ${timeNow()}`,'',' sc-kho-menu');
+    loadKhoMenu();
+  } catch(e){alert('Lỗi: '+e.message);}
+};
+
+// ── THU NGÂN ────────────────────────────────────────────────────
+function loadThuMenu(){
+  document.getElementById('thu-menu-date').textContent=dateVN();
+  document.getElementById('thu-menu-name').textContent=users[CU].name;
+  ['mo','trong','dong'].forEach(type=>{
+    get(ref(db,`reports/${today()}/${CU}/thu_${type}`)).then(snap=>{
+      const el=document.getElementById(`thbadge-${type}`);
+      if(snap.exists()){el.textContent='✅ Đã hoàn thành';el.className='mc-badge badge-done';}
+      else{el.textContent='Chưa hoàn thành';el.className='mc-badge badge-pending';}
+    }).catch(()=>{});
+  });
+}
+window.openThuCL = type => {
+  curThuType=type; thuChk={};
+  const cl=THU_CL[type];
+  document.getElementById('thu-cl-title').textContent=cl.emoji+' '+cl.title;
+  document.getElementById('thu-cl-sub').textContent=dateVN()+' · '+users[CU].name;
+  document.getElementById('thu-notes').value='';
+  renderCL('thu-cl-items',cl.items,thuChk,updThuP);
+  updThuP(); showSc('sc-thu-cl');
+};
+function updThuP(){
+  const {done,total,score,max,pct}=calcScore(THU_CL[curThuType].items,thuChk);
+  document.getElementById('thu-prog-score').textContent=`${done}/${total} · ${score}đ`;
+  document.getElementById('thu-prog-fill').style.width=pct+'%';
+  document.getElementById('thu-submit-btn').disabled=(done<Math.ceil(total*0.5));
+}
+window.submitThu = async () => {
+  const cl=THU_CL[curThuType]; const {score,max,pct}=calcScore(cl.items,thuChk);
+  const rep={uid:CU,name:users[CU].name,role:users[CU].role,type:`thu_${curThuType}`,caName:cl.title,checked:thuChk,score:pct,notes:document.getElementById('thu-notes').value,submittedAt:new Date().toISOString(),time:timeNow()};
+  try {
+    await set(ref(db,`reports/${today()}/${CU}/thu_${curThuType}`),rep);
+    showDone('💰','Đã nộp báo cáo ca!',`${cl.emoji} ${cl.title} — ${pct}%`,`${score}/${max} điểm · ${timeNow()}`,'',' sc-thu-menu');
+    loadThuMenu();
+  } catch(e){alert('Lỗi: '+e.message);}
+};
+
+// ── VI PHẠM ─────────────────────────────────────────────────────
+function populateVioNV(){
+  const s=document.getElementById('vio-nv');
+  s.innerHTML='<option value="">-- Không có --</option>';
+  Object.entries(users).forEach(([uid,u])=>{
+    if(uid==='admin')return;
+    const o=document.createElement('option'); o.value=uid; o.textContent=u.name; s.appendChild(o);
+  });
+}
+window.submitVio = async () => {
+  const desc=document.getElementById('vio-desc').value.trim();
+  if(!desc){alert('Vui lòng mô tả sự việc!');return;}
+  const nvUid=document.getElementById('vio-nv').value;
+  try {
+    await push(ref(db,'violations'),{reporterUid:CU,reporterName:users[CU].name,nvUid,nvName:nvUid?(users[nvUid]?.name||''):'Không có',type:document.getElementById('vio-type').value,desc,date:today(),time:timeNow(),status:'pending',submittedAt:new Date().toISOString()});
+    document.getElementById('vio-desc').value='';
+    alert('✅ Đã gửi báo cáo sự cố!'); showSc('sc-ca-menu');
+  } catch(e){alert('Lỗi: '+e.message);}
+};
+
+// ── ORDER FORM ──────────────────────────────────────────────────
+window.initOrderForm = () => { document.getElementById('order-rows').innerHTML=''; addOrderRow(); };
+window.addOrderRow = () => {
+  const id='or-'+Date.now();
+  const d=document.createElement('div'); d.className='order-row'; d.id=id;
+  d.innerHTML=`<input type="text" placeholder="Tên hàng cần nhập..."><input type="number" class="qty" placeholder="SL"><select><option value="sap_het">🟡 Sắp hết</option><option value="het_kel">🟠 Hết kệ</option><option value="het_kho">🔴 Hết kho</option></select><button class="btn-rm" onclick="this.parentElement.remove()">×</button>`;
+  document.getElementById('order-rows').appendChild(d);
+};
+window.submitOrders = async () => {
+  const rows=document.querySelectorAll('#order-rows .order-row');
+  if(!rows.length){alert('Vui lòng thêm ít nhất 1 mặt hàng!');return;}
+  const items=[];
+  rows.forEach(r=>{const ins=r.querySelectorAll('input'),sel=r.querySelector('select');if(ins[0].value.trim())items.push({name:ins[0].value.trim(),qty:ins[1].value||'?',status:sel.value});});
+  if(!items.length){alert('Vui lòng điền tên hàng!');return;}
+  try {
+    await push(ref(db,'orders'),{items,reporterUid:CU,reporterName:users[CU].name,date:today(),time:timeNow(),status:'pending',submittedAt:new Date().toISOString()});
+    document.getElementById('order-rows').innerHTML=''; addOrderRow();
+    alert('✅ Đã gửi đề xuất nhập hàng!'); showSc('sc-kho-menu');
+  } catch(e){alert('Lỗi: '+e.message);}
+};
+
+// ── DONE ────────────────────────────────────────────────────────
+function showDone(icon,title,score,detail,warn,back){
+  document.getElementById('done-icon').textContent=icon;
+  document.getElementById('done-title').textContent=title;
+  document.getElementById('done-score').textContent=score;
+  document.getElementById('done-detail').textContent=detail;
+  const w=document.getElementById('done-warn');
+  warn?(w.textContent=warn,w.style.display='block'):(w.style.display='none');
+  document.getElementById('done-back-btn').onclick=()=>{ const s=back.trim(); if(s==='sc-ca-menu')navHome(); else if(s==='sc-kho-menu')navHome(); else if(s==='sc-thu-menu')navHome(); else showSc(s); };
+  showSc('sc-done');
+}
+
+// ── ADMIN ───────────────────────────────────────────────────────
+function loadAdmin(){
+  document.getElementById('admin-date').textContent=dateVN();
+  loadAdminReports(); loadAdminVio(); loadAdminOrders(); loadAdminSummary(); loadAdminPins();
+}
+async function loadAdminReports(){
+  const c=document.getElementById('admin-reports-list');
+  try {
+    const snap=await get(ref(db,'reports'));
+    if(!snap.exists()){c.innerHTML='<div class="empty">Chưa có báo cáo nào hôm nay</div>';return;}
+    const data=snap.val();
+    const dates=Object.keys(data).sort((a,b)=>b.localeCompare(a));
+    c.innerHTML=dates.map(date=>{
+      const dd=data[date];
+      const reps=Object.entries(dd).flatMap(([uid,types])=>Object.entries(types).map(([t,r])=>({...r,uid,t})));
+      const dt=new Date(date);
+      const label=dt.toLocaleDateString('vi-VN',{weekday:'short',day:'2-digit',month:'2-digit',year:'2-digit'});
+      return `<div class="day-card">
+        <div class="day-card-hdr" onclick="toggleDay('dd-${date}')">
+          <div><div class="day-title">📅 ${label}</div><div class="day-meta">${reps.length} báo cáo · ${Object.keys(dd).length} nhân viên</div></div>
+          <div class="day-count">${reps.length} BC</div>
+        </div>
+        <div class="day-body" id="dd-${date}">
+          ${reps.map(r=>{const p=r.score||0;const cls=p>=90?'sco-green':p>=70?'sco-yellow':'sco-red';return`<div class="rep-item"><div style="display:flex;justify-content:space-between;align-items:center"><div class="rep-name">${r.name||'?'}</div><span class="sco-badge ${cls}">${p}%</span></div><div class="rep-meta">${r.caName||r.t} · ${r.time||''}</div>${r.notes?`<div class="rep-meta" style="color:#555;margin-top:3px">📝 ${r.notes}</div>`:''}</div>`;}).join('')}
+        </div>
+      </div>`;
+    }).join('');
+  } catch(e){c.innerHTML=`<div class="empty">Lỗi: ${e.message}</div>`;}
+}
+window.toggleDay=id=>{const el=document.getElementById(id);if(el)el.style.display=el.style.display==='block'?'none':'block';};
+
+async function loadAdminVio(){
+  const c=document.getElementById('admin-vio-list');
+  try{
+    const snap=await get(ref(db,'violations'));
+    if(!snap.exists()){c.innerHTML='<div class="empty">Không có sự cố nào</div>';return;}
+    const tmap={violation:'⚠️ Vi phạm',complaint:'😤 Khiếu nại',incident:'🔧 Sự cố'};
+    const items=Object.entries(snap.val()).sort((a,b)=>(b[1].submittedAt||'').localeCompare(a[1].submittedAt||''));
+    c.innerHTML=items.map(([id,v])=>`<div class="vio-item">
+      <div class="vio-top"><div><div class="vio-name">${tmap[v.type]||v.type}</div><div class="vio-meta">👤 ${v.reporterName} · ${v.date} ${v.time||''}</div>${v.nvName&&v.nvName!=='Không có'?`<div class="vio-meta">Liên quan: <b>${v.nvName}</b></div>`:''}<div class="vio-meta" style="color:#444;margin-top:4px">${v.desc}</div></div><span class="status-badge ${v.status==='pending'?'sb-pending':v.status==='approved'?'sb-approved':'sb-rejected'}">${v.status==='pending'?'Chờ duyệt':v.status==='approved'?'Ghi nhận':'Bỏ qua'}</span></div>
+      ${v.status==='pending'?`<div style="display:flex;gap:8px;margin-top:10px"><button class="btn-sm" onclick="handleVio('${id}','approved')" style="color:#1D9E75;border-color:#1D9E75">✅ Ghi nhận</button><button class="btn-sm" onclick="handleVio('${id}','rejected')">Bỏ qua</button></div>`:''}
+    </div>`).join('');
+  }catch(e){c.innerHTML=`<div class="empty">Lỗi: ${e.message}</div>`;}
+}
+window.handleVio=async(id,status)=>{await update(ref(db,`violations/${id}`),{status});loadAdminVio();};
+
+async function loadAdminOrders(){
+  const c=document.getElementById('admin-orders-list');
+  try{
+    const snap=await get(ref(db,'orders'));
+    if(!snap.exists()){c.innerHTML='<div class="empty">Không có đề xuất nào</div>';return;}
+    const items=Object.entries(snap.val()).filter(([,o])=>o.status==='pending').sort((a,b)=>(b[1].submittedAt||'').localeCompare(a[1].submittedAt||''));
+    if(!items.length){c.innerHTML='<div class="empty">Không có đề xuất đang chờ ✅</div>';return;}
+    const smap={sap_het:'🟡 Sắp hết',het_kel:'🟠 Hết kệ',het_kho:'🔴 Hết kho'};
+    c.innerHTML=items.map(([id,o])=>`<div class="vio-item">
+      <div class="vio-top"><div><div class="vio-name">📦 Đề xuất nhập hàng</div><div class="vio-meta">👤 ${o.reporterName} · ${o.date} ${o.time||''}</div></div><button class="btn-sm" onclick="doneOrder('${id}')" style="color:#1D9E75;border-color:#1D9E75">Đã xử lý ✓</button></div>
+      <div style="margin-top:8px">${o.items.map(i=>`<div class="rep-meta">• ${i.name} — SL: ${i.qty} · ${smap[i.status]||i.status}</div>`).join('')}</div>
+    </div>`).join('');
+  }catch(e){c.innerHTML=`<div class="empty">Lỗi: ${e.message}</div>`;}
+}
+window.doneOrder=async id=>{await update(ref(db,`orders/${id}`),{status:'done'});loadAdminOrders();};
+
+async function loadAdminSummary(){
+  const c=document.getElementById('admin-summary-list');
+  try{
+    const snap=await get(ref(db,'reports'));
+    const sum={};
+    Object.entries(users).forEach(([uid,u])=>{if(uid!=='admin')sum[uid]={name:u.name,role:u.role,scores:[],count:0};});
+    if(snap.exists()){
+      Object.values(snap.val()).forEach(dayData=>{
+        Object.entries(dayData).forEach(([uid,types])=>{
+          if(!sum[uid])return;
+          Object.values(types).forEach(r=>{if(typeof r.score==='number'){sum[uid].scores.push(r.score);sum[uid].count++;}});
+        });
+      });
+    }
+    const roleMap={truong_ca:'Trưởng ca',truong_kho:'Trưởng kho',thu_ngan:'Thu ngân'};
+    const rows=Object.values(sum).map(s=>{
+      const avg=s.scores.length?Math.round(s.scores.reduce((a,b)=>a+b,0)/s.scores.length):null;
+      const grade=avg===null?'Chưa có':avg>=90?'Xuất sắc':avg>=70?'Đạt yêu cầu':'Cần cải thiện';
+      const cls=avg===null?'':avg>=90?'grade-green':avg>=70?'grade-yellow':'grade-red';
+      return {name:s.name,role:roleMap[s.role]||s.role,avg,count:s.count,grade,cls};
+    });
+    c.innerHTML=`<div style="overflow-x:auto"><table class="sum-tbl"><thead><tr><th>Nhân viên</th><th>Vai trò</th><th>Điểm TB</th><th>BC</th><th>Xếp hạng</th></tr></thead><tbody>${rows.map(r=>`<tr><td style="font-weight:700">${r.name}</td><td style="color:#888">${r.role}</td><td style="font-weight:700;color:#1D9E75">${r.avg!==null?r.avg+'%':'--'}</td><td>${r.count}</td><td>${r.cls?`<span class="${r.cls}">${r.grade}</span>`:r.grade}</td></tr>`).join('')}</tbody></table></div>`;
+  }catch(e){c.innerHTML=`<div class="empty">Lỗi: ${e.message}</div>`;}
+}
+
+function loadAdminPins(){
+  const rmap={admin:'Admin',truong_ca:'Trưởng ca',truong_kho:'Trưởng kho',thu_ngan:'Thu ngân'};
+  const tmap={admin:'rt-admin',truong_ca:'rt-ca',truong_kho:'rt-kho',thu_ngan:'rt-thu'};
+  document.getElementById('admin-pin-list').innerHTML=Object.entries(users).map(([uid,u])=>`<div class="pin-item"><div><div class="pi-name">${u.name}</div><div class="pi-role"><span class="role-tag ${tmap[u.role]}">${rmap[u.role]||u.role}</span></div></div><div style="display:flex;align-items:center;gap:8px"><span style="font-size:12px;color:#999;font-family:monospace">PIN: ${u.pin}</span><button class="btn-sm" onclick="openPinModal('${uid}')">Đổi PIN</button></div></div>`).join('');
+}
+
+window.switchTab=(el,tabId)=>{
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.tc').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('tc-'+tabId).classList.add('active');
+};
+
+// ── PIN MODAL ────────────────────────────────────────────────────
+window.openPinModal=uid=>{editPinUid=uid;document.getElementById('modal-uname').textContent=users[uid].name;document.getElementById('new-pin').value='';document.getElementById('pin-err').textContent='';document.getElementById('pin-modal').classList.add('open');};
+window.closePinModal=()=>{document.getElementById('pin-modal').classList.remove('open');editPinUid=null;};
+window.savePIN=async()=>{
+  const np=document.getElementById('new-pin').value.trim();
+  if(!/^\d{4}$/.test(np)){document.getElementById('pin-err').textContent='PIN phải là 4 chữ số';return;}
+  try{
+    await update(ref(db,`config/users/${editPinUid}`),{pin:np});
+    users[editPinUid].pin=np; closePinModal(); loadAdminPins();
+    alert('✅ Đã đổi PIN cho '+users[editPinUid].name);
+  }catch(e){document.getElementById('pin-err').textContent='Lỗi: '+e.message;}
+};
+
+// ── BOOT ─────────────────────────────────────────────────────────
+init();
+</script>
+</body>
+</html>
