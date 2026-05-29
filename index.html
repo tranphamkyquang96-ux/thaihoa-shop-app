@@ -653,15 +653,20 @@ window.doLogin = () => {
 window.navHome = () => {
   if (!CU) return;
   const role = users[CU].role;
+  document.getElementById('nav-report').style.display = role==='admin' ? '' : 'none';
   if      (role==='admin')      { loadAdmin(); showSc('sc-admin'); }
   else if (role==='truong_ca')  { loadCaMenu(); showSc('sc-ca-menu'); }
   else if (role==='truong_kho') { loadKhoMenu(); showSc('sc-kho-menu'); }
   else if (role==='thu_ngan')   { loadThuMenu(); showSc('sc-thu-menu'); }
   setNav('nav-home');
 };
-window.navAdmin = () => { if(!CU) return; loadAdmin(); showSc('sc-admin'); setNav('nav-report'); };
+window.navAdmin = () => {
+  if(!CU || users[CU].role!=='admin') return;
+  loadAdmin(); showSc('sc-admin'); setNav('nav-report');
+};
 window.doLogout = () => {
   CU=null; CP=''; caChk={}; khoChk={}; thuChk={};
+  document.getElementById('nav-report').style.display='';
   document.getElementById('bnav').style.display='none';
   document.getElementById('sel-user').value='';
   document.getElementById('pin-disp').textContent='────';
