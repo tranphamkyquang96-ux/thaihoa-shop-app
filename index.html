@@ -486,7 +486,7 @@ const db  = getDatabase(app);
 
 // ── CHECKLIST DATA ──────────────────────────────────────────────
 const CA_CL = {
-  mo:{title:"Mở ca",emoji:"☀️",items:[
+  mo:{title:"Mở ca",emoji:"☀️",minSec:300,items:[
     {id:"nhan_quy",    t:"Nhận tiền quỹ từ ca trước — đếm thực tế + ký xác nhận",p:10},
     {id:"bat_thiet_bi",t:"Bật đèn, điều hoà, quạt đúng khu vực quy định",p:5},
     {id:"kiem_camera", t:"Xác nhận camera hoạt động bình thường",p:5},
@@ -495,7 +495,7 @@ const CA_CL = {
     {id:"diem_danh",   t:"Điểm danh nhân viên — phân công vị trí từng người cụ thể",p:10},
     {id:"nghe_bg",     t:"Nghe báo cáo tình trạng từ ca trước (nếu có)",p:7}
   ]},
-  trong:{title:"Trong ca",emoji:"🔄",items:[
+  trong:{title:"Trong ca",emoji:"🔄",minSec:480,items:[
     {id:"vt1",        t:"Kiểm tra nhân viên đúng vị trí — lần 1",p:10},
     {id:"vt2",        t:"Kiểm tra nhân viên đúng vị trí — lần 2",p:10},
     {id:"hang_kel",   t:"Kiểm kệ trống — báo trưởng kho bổ sung kịp thời",p:8},
@@ -503,7 +503,7 @@ const CA_CL = {
     {id:"ho_tro",     t:"Hỗ trợ thu ngân giờ cao điểm khi cần",p:5},
     {id:"date_check", t:"Kiểm tra hạn sử dụng hàng trên kệ — ưu tiên Mẹ & Bé",p:6}
   ]},
-  dong:{title:"Đóng ca & Bàn giao",emoji:"🌙",items:[
+  dong:{title:"Đóng ca & Bàn giao",emoji:"🌙",minSec:360,items:[
     {id:"dem_tien",    t:"Đếm tiền mặt cuối ca — đối chiếu KiotViet",p:12},
     {id:"ghi_lech",    t:"Ghi nhận chênh lệch nếu có — không tự xử lý, báo admin",p:8},
     {id:"bc_hang",     t:"Báo cáo danh sách hàng cần nhập cho trưởng kho",p:6},
@@ -514,21 +514,21 @@ const CA_CL = {
   ]}
 };
 const KHO_CL = {
-  ngay:{title:"Kiểm hàng ngày",emoji:"📦",items:[
+  ngay:{title:"Kiểm hàng ngày",emoji:"📦",minSec:600,items:[
     {id:"k_xoay", t:"10 mã xoay vòng hôm nay (nhóm dễ mất) — đếm cả kệ lẫn kho",p:25},
     {id:"k_pg",   t:"Xác nhận PG có mặt tại quầy sữa — ghi chú nếu vắng",p:10},
     {id:"k_top5", t:"Top 5 bán chạy KiotViet — đối chiếu tồn thực tế",p:25},
     {id:"k_nguong",t:"Ghi nhận mặt hàng tồn dưới ngưỡng cảnh báo",p:20},
     {id:"k_nhap", t:"Nhập kết quả kiểm vào KiotViet",p:20}
   ]},
-  tuan:{title:"Kiểm hàng tuần",emoji:"📊",items:[
+  tuan:{title:"Kiểm hàng tuần",emoji:"📊",minSec:900,items:[
     {id:"t_sua",  t:"Sữa không có PG (10+ mã) — kiểm trực tiếp, đối chiếu KiotViet",p:25},
     {id:"t_spot", t:"Spot-check bất ngờ 3-5 mã sữa có PG — không báo trước",p:15},
     {id:"t_mebe", t:"Khu Mẹ & Bé: kiểm date hàng + tồn kho toàn khu",p:20},
     {id:"t_khu",  t:"1 khu cố định theo lịch tuần — đếm đối chiếu KiotViet",p:20},
     {id:"t_bc",   t:"Tổng hợp báo cáo tuần: lệch, nguyên nhân, đề xuất",p:20}
   ]},
-  thang:{title:"Kiểm tháng",emoji:"🗂️",items:[
+  thang:{title:"Kiểm tháng",emoji:"🗂️",minSec:1200,items:[
     {id:"m_a",  t:"Nhóm A (~200 SKU giá trị cao) — 2 người kiểm chéo độc lập",p:25},
     {id:"m_b",  t:"Nhóm B (~800 SKU) — 1 người đếm, 1 người xác nhận",p:20},
     {id:"m_c",  t:"Nhóm C — luân phiên từng khu nhỏ (đã rải ngày 1-25)",p:15},
@@ -536,7 +536,7 @@ const KHO_CL = {
     {id:"m_pg", t:"PG ký xác nhận số liệu sữa cuối tháng cùng trưởng kho",p:10},
     {id:"m_bc", t:"Báo cáo tháng nộp admin: lệch tổng, nguyên nhân, đề xuất",p:10}
   ]},
-  nhanhang:{title:"Nhận hàng NCC",emoji:"🚚",items:[
+  nhanhang:{title:"Nhận hàng NCC",emoji:"🚚",minSec:600,items:[
     {id:"n_dem",  t:"Đếm số lượng thực tế từng mặt hàng — so với hoá đơn NCC",p:25},
     {id:"n_date", t:"Kiểm tra date sản xuất + hạn sử dụng toàn bộ lô hàng",p:20},
     {id:"n_baobi",t:"Kiểm tra tình trạng bao bì — ghi nhận hàng lỗi/hỏng",p:15},
@@ -545,20 +545,20 @@ const KHO_CL = {
   ]}
 };
 const THU_CL = {
-  mo:{title:"Mở ca thu ngân",emoji:"☀️",items:[
+  mo:{title:"Mở ca thu ngân",emoji:"☀️",minSec:300,items:[
     {id:"th_quy",    t:"Nhận bàn giao tiền quỹ — đếm thực tế + ký xác nhận",p:15},
     {id:"th_pos",    t:"Kiểm tra máy POS / thẻ hoạt động bình thường",p:10},
     {id:"th_hoadon", t:"Kiểm giấy in hoá đơn — thay cuộn mới nếu gần hết",p:10},
     {id:"th_camera", t:"Xác nhận camera khu thu ngân hoạt động",p:8},
     {id:"th_kv",     t:"Mở KiotViet, đăng nhập ca mới, kiểm tồn quỹ đầu ca",p:12}
   ]},
-  trong:{title:"Trong ca thu ngân",emoji:"🔄",items:[
+  trong:{title:"Trong ca thu ngân",emoji:"🔄",minSec:480,items:[
     {id:"th_doi",    t:"Đối chiếu doanh thu theo giờ với KiotViet",p:20},
     {id:"th_hoan",   t:"Xử lý hoàn trả / đổi hàng đúng quy trình — có ký xác nhận",p:20},
     {id:"th_khach",  t:"Hỗ trợ khách đợi lâu — không để khách chờ quá 3 phút",p:15},
     {id:"th_ket",    t:"Không để tiền mặt trên quầy quá 500k — gửi két định kỳ",p:15}
   ]},
-  dong:{title:"Đóng ca thu ngân",emoji:"🌙",items:[
+  dong:{title:"Đóng ca thu ngân",emoji:"🌙",minSec:360,items:[
     {id:"th_dem",    t:"Đếm và kiểm tiền mặt cuối ca — phân loại mệnh giá",p:20},
     {id:"th_in",     t:"In báo cáo doanh thu KiotViet cuối ca",p:15},
     {id:"th_dc",     t:"Đối chiếu tiền mặt thực tế với doanh thu KiotViet",p:20},
@@ -586,11 +586,13 @@ let editPinUid = null;
 let multiOrderOpener = 'ca';
 let orderFilter = 'pending';
 let vioFilter = 'pending';
+let clStartTime = null;
 
 // ── HELPERS ─────────────────────────────────────────────────────
 const today   = () => new Date().toISOString().split('T')[0];
 const timeNow = () => new Date().toLocaleTimeString('vi-VN',{hour:'2-digit',minute:'2-digit'});
 const dateVN  = () => new Date().toLocaleDateString('vi-VN',{weekday:'long',day:'2-digit',month:'2-digit',year:'numeric'});
+const fmtSec  = s => { const m=Math.floor(s/60),sec=s%60; return m>0?(sec>0?`${m}p ${sec}s`:`${m} phút`):`${sec}s`; };
 
 // ── INIT ────────────────────────────────────────────────────────
 async function init() {
@@ -696,7 +698,7 @@ function loadCaMenu() {
 
 // ── CA CHECKLIST ────────────────────────────────────────────────
 window.openCaCL = type => {
-  curCaType=type; caChk={};
+  curCaType=type; caChk={}; clStartTime=Date.now();
   const cl=CA_CL[type];
   document.getElementById('ca-cl-title').textContent = cl.emoji+' '+cl.title;
   document.getElementById('ca-cl-sub').textContent   = dateVN()+' · '+users[CU].name;
@@ -732,7 +734,10 @@ function updCaP() {
 
 window.submitCa = async () => {
   const cl=CA_CL[curCaType]; const {score,max,pct}=calcScore(cl.items,caChk);
-  const rep={uid:CU,name:users[CU].name,role:users[CU].role,type:curCaType,caName:cl.title,checked:caChk,score:pct,notes:document.getElementById('ca-notes').value,submittedAt:new Date().toISOString(),time:timeNow()};
+  const elapsed=clStartTime?Math.round((Date.now()-clStartTime)/1000):0;
+  const threshold=cl.minSec||0;
+  const timeWarning=elapsed>0&&threshold>0&&elapsed<threshold;
+  const rep={uid:CU,name:users[CU].name,role:users[CU].role,type:curCaType,caName:cl.title,checked:caChk,score:pct,notes:document.getElementById('ca-notes').value,submittedAt:new Date().toISOString(),time:timeNow(),timeElapsed:elapsed,timeThreshold:threshold,timeWarning};
   try {
     await set(ref(db,`reports/${today()}/${CU}/${curCaType}`),rep);
     showDone('✅','Đã nộp báo cáo ca!',`${cl.emoji} ${cl.title} — ${pct}%`,`${score}/${max} điểm · ${timeNow()}`,pct<70?'⚠️ Điểm dưới 70% — vui lòng hoàn thành đầy đủ nhiệm vụ hơn!':'','sc-ca-menu');
@@ -753,7 +758,7 @@ function loadKhoMenu() {
   });
 }
 window.openKhoCL = type => {
-  curKhoType=type; khoChk={};
+  curKhoType=type; khoChk={}; clStartTime=Date.now();
   const cl=KHO_CL[type];
   document.getElementById('kho-cl-title').textContent=cl.emoji+' '+cl.title;
   document.getElementById('kho-cl-sub').textContent=dateVN()+' · '+users[CU].name;
@@ -769,7 +774,10 @@ function updKhoP(){
 }
 window.submitKho = async () => {
   const cl=KHO_CL[curKhoType]; const {score,max,pct}=calcScore(cl.items,khoChk);
-  const rep={uid:CU,name:users[CU].name,role:users[CU].role,type:curKhoType,caName:cl.title,checked:khoChk,score:pct,notes:document.getElementById('kho-notes').value,submittedAt:new Date().toISOString(),time:timeNow()};
+  const elapsed=clStartTime?Math.round((Date.now()-clStartTime)/1000):0;
+  const threshold=cl.minSec||0;
+  const timeWarning=elapsed>0&&threshold>0&&elapsed<threshold;
+  const rep={uid:CU,name:users[CU].name,role:users[CU].role,type:curKhoType,caName:cl.title,checked:khoChk,score:pct,notes:document.getElementById('kho-notes').value,submittedAt:new Date().toISOString(),time:timeNow(),timeElapsed:elapsed,timeThreshold:threshold,timeWarning};
   try {
     await set(ref(db,`reports/${today()}/${CU}/${curKhoType}`),rep);
     showDone('📦','Đã nộp báo cáo kho!',`${cl.emoji} ${cl.title} — ${pct}%`,`${score}/${max} điểm · ${timeNow()}`,'',' sc-kho-menu');
@@ -790,7 +798,7 @@ function loadThuMenu(){
   });
 }
 window.openThuCL = type => {
-  curThuType=type; thuChk={};
+  curThuType=type; thuChk={}; clStartTime=Date.now();
   const cl=THU_CL[type];
   document.getElementById('thu-cl-title').textContent=cl.emoji+' '+cl.title;
   document.getElementById('thu-cl-sub').textContent=dateVN()+' · '+users[CU].name;
@@ -806,7 +814,10 @@ function updThuP(){
 }
 window.submitThu = async () => {
   const cl=THU_CL[curThuType]; const {score,max,pct}=calcScore(cl.items,thuChk);
-  const rep={uid:CU,name:users[CU].name,role:users[CU].role,type:`thu_${curThuType}`,caName:cl.title,checked:thuChk,score:pct,notes:document.getElementById('thu-notes').value,submittedAt:new Date().toISOString(),time:timeNow()};
+  const elapsed=clStartTime?Math.round((Date.now()-clStartTime)/1000):0;
+  const threshold=cl.minSec||0;
+  const timeWarning=elapsed>0&&threshold>0&&elapsed<threshold;
+  const rep={uid:CU,name:users[CU].name,role:users[CU].role,type:`thu_${curThuType}`,caName:cl.title,checked:thuChk,score:pct,notes:document.getElementById('thu-notes').value,submittedAt:new Date().toISOString(),time:timeNow(),timeElapsed:elapsed,timeThreshold:threshold,timeWarning};
   try {
     await set(ref(db,`reports/${today()}/${CU}/thu_${curThuType}`),rep);
     showDone('💰','Đã nộp báo cáo ca!',`${cl.emoji} ${cl.title} — ${pct}%`,`${score}/${max} điểm · ${timeNow()}`,'',' sc-thu-menu');
@@ -1001,7 +1012,13 @@ async function loadAdminReports(){
           <div class="day-count">${reps.length} BC</div>
         </div>
         <div class="day-body" id="dd-${date}">
-          ${reps.map(r=>{const p=r.score||0;const cls=p>=90?'sco-green':p>=70?'sco-yellow':'sco-red';return`<div class="rep-item"><div style="display:flex;justify-content:space-between;align-items:center"><div class="rep-name">${r.name||'?'}</div><span class="sco-badge ${cls}">${p}%</span></div><div class="rep-meta">${r.caName||r.t} · ${r.time||''}</div>${r.notes?`<div class="rep-meta" style="color:#555;margin-top:3px">📝 ${r.notes}</div>`:''}</div>`;}).join('')}
+          ${reps.map(r=>{
+            const p=r.score||0;
+            const cls=p>=90?'sco-green':p>=70?'sco-yellow':'sco-red';
+            const timeStr=r.timeElapsed?` · ⏱ ${fmtSec(r.timeElapsed)}`:'';
+            const warnHtml=r.timeWarning&&r.timeElapsed?`<div style="margin-top:5px"><span class="sco-badge sco-red">⚠️ Cảnh báo: Hoàn thành trong ${fmtSec(r.timeElapsed)} — có thể gian lận</span><div class="rep-meta" style="margin-top:2px;color:#aaa">Ngưỡng chuẩn: ${fmtSec(r.timeThreshold||0)}</div></div>`:'';
+            return`<div class="rep-item"><div style="display:flex;justify-content:space-between;align-items:center"><div class="rep-name">${r.name||'?'}</div><span class="sco-badge ${cls}">${p}%</span></div><div class="rep-meta">${r.caName||r.t} · ${r.time||''}${timeStr}</div>${warnHtml}${r.notes?`<div class="rep-meta" style="color:#555;margin-top:3px">📝 ${r.notes}</div>`:''}</div>`;
+          }).join('')}
         </div>
       </div>`;
     }).join('');
