@@ -167,6 +167,19 @@ textarea:focus{border-color:#1D9E75}
 .spin{width:36px;height:36px;border:3px solid #e8e8e4;border-top-color:#1D9E75;border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto 12px}
 @keyframes spin{to{transform:rotate(360deg)}}
 .vio-form-wrap{background:#f9f9f7;border-radius:10px;border:1px solid #e8e8e4;padding:14px;margin-bottom:12px}
+/* KN FORM */
+input[type=checkbox]{width:18px;height:18px;padding:0;border:none;border-radius:3px;cursor:pointer;flex-shrink:0;-webkit-appearance:auto;appearance:auto;accent-color:#1D9E75;box-shadow:none}
+.kn-level{border-radius:10px;padding:13px;margin-bottom:10px;border:2px solid #e8e8e4;background:#fff}
+.kn-level.kn-do{border-color:#E24B4A;background:#FFF5F5}
+.kn-level.kn-vang{border-color:#F59E0B;background:#FFFBEB}
+.kn-level.kn-xam{border-color:#9CA3AF;background:#F9FAFB}
+.kn-level.disabled{opacity:0.4;pointer-events:none}
+.kn-label-text{font-size:13px;font-weight:700;color:#1a1a1a}
+.kn-sub{font-size:11px;color:#888;margin-top:1px}
+.kn-desc{margin-top:10px;display:none}
+.kn-desc.show{display:block}
+.kn-none-wrap{border:2px solid #e8e8e4;border-radius:10px;padding:13px;margin-bottom:14px;background:#f9f9f7}
+.kn-none-wrap.checked{border-color:#1D9E75;background:#f0faf6}
 </style>
 </head>
 <body>
@@ -214,7 +227,8 @@ textarea:focus{border-color:#1D9E75}
   <div class="mc" onclick="openCaCL('dong')"><div class="mc-icon mc-amber">🌙</div><div class="mc-body"><div class="mc-title">Đóng ca & Bàn giao</div><div class="mc-sub">Đếm tiền, bàn giao, khoá cửa</div><div class="mc-badge badge-pending" id="badge-dong">Chưa hoàn thành</div></div><div class="mc-arr">›</div></div>
   <div style="height:8px"></div>
   <div class="section-title">BÁO CÁO</div>
-  <div class="mc" onclick="showSc('sc-vio-form')"><div class="mc-icon mc-red">⚠️</div><div class="mc-body"><div class="mc-title">Báo cáo sự cố / Vi phạm</div><div class="mc-sub">Ghi nhận vi phạm hoặc khiếu nại</div></div><div class="mc-arr">›</div></div>
+  <div class="mc" onclick="showSc('sc-vio-form')"><div class="mc-icon mc-red">⚠️</div><div class="mc-body"><div class="mc-title">Báo cáo sự cố / Vi phạm</div><div class="mc-sub">Ghi nhận vi phạm nhân viên, sự cố thiết bị</div></div><div class="mc-arr">›</div></div>
+  <div class="mc" onclick="openKNForm()"><div class="mc-icon mc-red">😤</div><div class="mc-body"><div class="mc-title">Khiếu nại khách hàng</div><div class="mc-sub">Ghi nhận theo mức độ ưu tiên</div><div class="mc-badge badge-pending" id="badge-kn">Chưa báo cáo</div></div><div class="mc-arr">›</div></div>
 </div>
 
 <!-- CA CHECKLIST -->
@@ -300,6 +314,45 @@ textarea:focus{border-color:#1D9E75}
       <div style="margin-bottom:10px"><label>Mô tả chi tiết</label><textarea id="vio-desc" rows="4" placeholder="Mô tả sự việc, thời gian xảy ra, mức độ..."></textarea></div>
       <button class="btn btn-red" onclick="submitVio()">🚨 Gửi báo cáo</button>
     </div>
+  </div>
+</div>
+
+<!-- KHIẾU NẠI / SỰ CỐ FORM -->
+<div class="screen" id="sc-kn-form">
+  <div class="hdr"><div class="hdr-row">
+    <button onclick="showSc('sc-ca-menu')" style="background:none;border:none;cursor:pointer;font-size:20px;color:#666;padding:0 10px 0 0;line-height:1">‹</button>
+    <div><div class="hdr-title">Khiếu nại & Sự cố</div><div class="hdr-sub" id="kn-form-sub"></div></div>
+  </div></div>
+  <div class="pad">
+    <div class="info-box">Chọn mức độ phù hợp và mô tả chi tiết. Admin sẽ xử lý theo độ ưu tiên.</div>
+    <div class="kn-level kn-do" id="kn-do-wrap">
+      <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;margin-bottom:0">
+        <input type="checkbox" id="kn-do" onchange="toggleKNLevel('do')" style="margin-top:2px">
+        <div><div class="kn-label-text">🔴 Khẩn cấp — Báo admin ngay trong 5 phút</div><div class="kn-sub">Trộm cắp, tai nạn, sự cố nghiêm trọng...</div></div>
+      </label>
+      <div class="kn-desc" id="kn-do-desc-wrap"><textarea id="kn-do-desc" rows="3" placeholder="Mô tả chi tiết sự cố khẩn cấp..."></textarea></div>
+    </div>
+    <div class="kn-level kn-vang" id="kn-vang-wrap">
+      <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;margin-bottom:0">
+        <input type="checkbox" id="kn-vang" onchange="toggleKNLevel('vang')" style="margin-top:2px">
+        <div><div class="kn-label-text">🟡 Trong ca — Xử lý và báo cáo trong hôm nay</div><div class="kn-sub">Khiếu nại khách, hàng lỗi, nhân viên vi phạm nhẹ...</div></div>
+      </label>
+      <div class="kn-desc" id="kn-vang-desc-wrap"><textarea id="kn-vang-desc" rows="3" placeholder="Mô tả chi tiết sự cố cần xử lý trong ca..."></textarea></div>
+    </div>
+    <div class="kn-level kn-xam" id="kn-xam-wrap">
+      <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;margin-bottom:0">
+        <input type="checkbox" id="kn-xam" onchange="toggleKNLevel('xam')" style="margin-top:2px">
+        <div><div class="kn-label-text">⚫ Cuối ngày — Ghi nhận để theo dõi</div><div class="kn-sub">Phản hồi khách, nhận xét nhỏ, góp ý...</div></div>
+      </label>
+      <div class="kn-desc" id="kn-xam-desc-wrap"><textarea id="kn-xam-desc" rows="3" placeholder="Mô tả chi tiết để ghi nhận..."></textarea></div>
+    </div>
+    <div class="kn-none-wrap" id="kn-none-wrap">
+      <label style="display:flex;align-items:center;gap:10px;cursor:pointer;width:100%;margin-bottom:0">
+        <input type="checkbox" id="kn-none" onchange="toggleKNNone()">
+        <span style="font-size:13px;font-weight:600;color:#1a1a1a">✅ Không có khiếu nại / sự cố trong ca này</span>
+      </label>
+    </div>
+    <button class="btn btn-green" onclick="submitKN()">💾 Lưu báo cáo</button>
   </div>
 </div>
 
@@ -589,6 +642,11 @@ function loadCaMenu() {
       else               { el.textContent='Chưa hoàn thành';  el.className='mc-badge badge-pending'; }
     }).catch(()=>{});
   });
+  get(ref(db,`complaints/${today()}/${CU}`)).then(snap=>{
+    const el=document.getElementById('badge-kn');
+    if(snap.exists()){el.textContent='✅ Đã báo cáo';el.className='mc-badge badge-done';}
+    else{el.textContent='Chưa báo cáo';el.className='mc-badge badge-pending';}
+  }).catch(()=>{});
 }
 
 // ── CA CHECKLIST ────────────────────────────────────────────────
@@ -731,19 +789,76 @@ window.submitVio = async () => {
   } catch(e){alert('Lỗi: '+e.message);}
 };
 
+// ── KHIẾU NẠI / SỰ CỐ ──────────────────────────────────────────
+window.openKNForm = () => {
+  ['do','vang','xam'].forEach(lv=>{
+    document.getElementById('kn-'+lv).checked=false;
+    document.getElementById('kn-'+lv+'-desc').value='';
+    document.getElementById('kn-'+lv+'-desc-wrap').classList.remove('show');
+    document.getElementById('kn-'+lv+'-wrap').classList.remove('disabled');
+  });
+  document.getElementById('kn-none').checked=false;
+  document.getElementById('kn-none-wrap').classList.remove('checked');
+  document.getElementById('kn-form-sub').textContent=dateVN()+' · '+users[CU].name;
+  showSc('sc-kn-form');
+};
+window.toggleKNLevel = lv => {
+  const checked=document.getElementById('kn-'+lv).checked;
+  document.getElementById('kn-'+lv+'-desc-wrap').classList.toggle('show',checked);
+  if(checked){
+    document.getElementById('kn-none').checked=false;
+    document.getElementById('kn-none-wrap').classList.remove('checked');
+  }
+};
+window.toggleKNNone = () => {
+  const checked=document.getElementById('kn-none').checked;
+  document.getElementById('kn-none-wrap').classList.toggle('checked',checked);
+  ['do','vang','xam'].forEach(lv=>{
+    document.getElementById('kn-'+lv+'-wrap').classList.toggle('disabled',checked);
+    if(checked){
+      document.getElementById('kn-'+lv).checked=false;
+      document.getElementById('kn-'+lv+'-desc-wrap').classList.remove('show');
+    }
+  });
+};
+window.submitKN = async () => {
+  const none=document.getElementById('kn-none').checked;
+  const levels=[];
+  if(!none){
+    for(const lv of ['do','vang','xam']){
+      if(!document.getElementById('kn-'+lv).checked)continue;
+      const desc=document.getElementById('kn-'+lv+'-desc').value.trim();
+      const label=lv==='do'?'ĐỎ/KHẨN':lv==='vang'?'VÀNG':'XÁM';
+      if(!desc){alert('Vui lòng mô tả chi tiết cho mức '+label+'!');return;}
+      levels.push({level:lv,desc});
+    }
+    if(!levels.length){alert('Chọn ít nhất 1 mức sự cố, hoặc tích "Không có khiếu nại"!');return;}
+  }
+  try{
+    await set(ref(db,`complaints/${today()}/${CU}`),{
+      reporterUid:CU,reporterName:users[CU].name,
+      date:today(),time:timeNow(),submittedAt:new Date().toISOString(),
+      noComplaints:none,levels
+    });
+    const summary=none?'Không có sự cố trong ca':'Ghi nhận '+levels.length+' sự cố';
+    showDone('😤','Đã lưu báo cáo!',summary,timeNow(),'','sc-ca-menu');
+    loadCaMenu();
+  }catch(e){alert('Lỗi: '+e.message);}
+};
+
 // ── ORDER FORM ──────────────────────────────────────────────────
 window.initOrderForm = () => { document.getElementById('order-rows').innerHTML=''; addOrderRow(); };
 window.addOrderRow = () => {
   const id='or-'+Date.now();
   const d=document.createElement('div'); d.className='order-row'; d.id=id;
-  d.innerHTML=`<input type="text" placeholder="Tên hàng cần nhập..."><input type="number" class="qty" placeholder="SL"><select><option value="sap_het">🟡 Sắp hết</option><option value="het_kel">🟠 Hết kệ</option><option value="het_kho">🔴 Hết kho</option></select><button class="btn-rm" onclick="this.parentElement.remove()">×</button>`;
+  d.innerHTML=`<input type="text" placeholder="Tên hàng cần nhập..."><input type="text" inputmode="numeric" class="qty" placeholder="SL"><select><option value="sap_het">🟡 Sắp hết</option><option value="het_kel">🟠 Hết kệ</option><option value="het_kho">🔴 Hết kho</option></select><button class="btn-rm" onclick="this.parentElement.remove()">×</button>`;
   document.getElementById('order-rows').appendChild(d);
 };
 window.submitOrders = async () => {
   const rows=document.querySelectorAll('#order-rows .order-row');
   if(!rows.length){alert('Vui lòng thêm ít nhất 1 mặt hàng!');return;}
   const items=[];
-  rows.forEach(r=>{const ins=r.querySelectorAll('input'),sel=r.querySelector('select');if(ins[0].value.trim())items.push({name:ins[0].value.trim(),qty:ins[1].value||'?',status:sel.value});});
+  rows.forEach(r=>{const ins=r.querySelectorAll('input'),sel=r.querySelector('select');if(ins[0].value.trim())items.push({name:ins[0].value.trim(),qty:ins[1].value.trim()||'?',status:sel.value});});
   if(!items.length){alert('Vui lòng điền tên hàng!');return;}
   try {
     await push(ref(db,'orders'),{items,reporterUid:CU,reporterName:users[CU].name,date:today(),time:timeNow(),status:'pending',submittedAt:new Date().toISOString()});
@@ -798,14 +913,38 @@ window.toggleDay=id=>{const el=document.getElementById(id);if(el)el.style.displa
 async function loadAdminVio(){
   const c=document.getElementById('admin-vio-list');
   try{
-    const snap=await get(ref(db,'violations'));
-    if(!snap.exists()){c.innerHTML='<div class="empty">Không có sự cố nào</div>';return;}
+    const [vSnap,cSnap]=await Promise.all([get(ref(db,'violations')),get(ref(db,'complaints'))]);
+    const all=[];
+    if(vSnap.exists()) Object.entries(vSnap.val()).forEach(([id,v])=>all.push({id,v,kind:'vio'}));
+    if(cSnap.exists()){
+      Object.entries(cSnap.val()).forEach(([date,byUser])=>{
+        if(typeof byUser!=='object')return;
+        Object.entries(byUser).forEach(([uid,v])=>all.push({id:date+'_'+uid,v,kind:'kn'}));
+      });
+    }
+    if(!all.length){c.innerHTML='<div class="empty">Không có sự cố nào</div>';return;}
+    all.sort((a,b)=>(b.v.submittedAt||'').localeCompare(a.v.submittedAt||''));
     const tmap={violation:'⚠️ Vi phạm',complaint:'😤 Khiếu nại',incident:'🔧 Sự cố'};
-    const items=Object.entries(snap.val()).sort((a,b)=>(b[1].submittedAt||'').localeCompare(a[1].submittedAt||''));
-    c.innerHTML=items.map(([id,v])=>`<div class="vio-item">
-      <div class="vio-top"><div><div class="vio-name">${tmap[v.type]||v.type}</div><div class="vio-meta">👤 ${v.reporterName} · ${v.date} ${v.time||''}</div>${v.nvName&&v.nvName!=='Không có'?`<div class="vio-meta">Liên quan: <b>${v.nvName}</b></div>`:''}<div class="vio-meta" style="color:#444;margin-top:4px">${v.desc}</div></div><span class="status-badge ${v.status==='pending'?'sb-pending':v.status==='approved'?'sb-approved':'sb-rejected'}">${v.status==='pending'?'Chờ duyệt':v.status==='approved'?'Ghi nhận':'Bỏ qua'}</span></div>
-      ${v.status==='pending'?`<div style="display:flex;gap:8px;margin-top:10px"><button class="btn-sm" onclick="handleVio('${id}','approved')" style="color:#1D9E75;border-color:#1D9E75">✅ Ghi nhận</button><button class="btn-sm" onclick="handleVio('${id}','rejected')">Bỏ qua</button></div>`:''}
-    </div>`).join('');
+    const lvmap={do:'🔴 Khẩn cấp',vang:'🟡 Trong ca',xam:'⚫ Cuối ngày'};
+    c.innerHTML=all.map(({id,v,kind})=>{
+      if(kind==='vio'){
+        return`<div class="vio-item">
+          <div class="vio-top"><div><div class="vio-name">${tmap[v.type]||v.type}</div><div class="vio-meta">👤 ${v.reporterName} · ${v.date} ${v.time||''}</div>${v.nvName&&v.nvName!=='Không có'?`<div class="vio-meta">Liên quan: <b>${v.nvName}</b></div>`:''}<div class="vio-meta" style="color:#444;margin-top:4px">${v.desc}</div></div><span class="status-badge ${v.status==='pending'?'sb-pending':v.status==='approved'?'sb-approved':'sb-rejected'}">${v.status==='pending'?'Chờ duyệt':v.status==='approved'?'Ghi nhận':'Bỏ qua'}</span></div>
+          ${v.status==='pending'?`<div style="display:flex;gap:8px;margin-top:10px"><button class="btn-sm" onclick="handleVio('${id}','approved')" style="color:#1D9E75;border-color:#1D9E75">✅ Ghi nhận</button><button class="btn-sm" onclick="handleVio('${id}','rejected')">Bỏ qua</button></div>`:''}
+        </div>`;
+      }
+      const lvs=v.levels||[];
+      const hasUrgent=lvs.some(l=>l.level==='do');
+      const badge=v.noComplaints
+        ?'<span class="status-badge sb-approved">Không có sự cố</span>'
+        :hasUrgent
+          ?'<span class="status-badge" style="background:#FCEBEB;color:#A32D2D">🔴 Khẩn cấp</span>'
+          :'<span class="status-badge sb-pending">Cần xử lý</span>';
+      const lvHtml=lvs.map(l=>`<div class="vio-meta" style="margin-top:3px">${lvmap[l.level]||l.level}: ${l.desc}</div>`).join('');
+      return`<div class="vio-item">
+        <div class="vio-top"><div><div class="vio-name">😤 Khiếu nại / Sự cố ca</div><div class="vio-meta">👤 ${v.reporterName} · ${v.date} ${v.time||''}</div>${lvHtml}</div>${badge}</div>
+      </div>`;
+    }).join('');
   }catch(e){c.innerHTML=`<div class="empty">Lỗi: ${e.message}</div>`;}
 }
 window.handleVio=async(id,status)=>{await update(ref(db,`violations/${id}`),{status});loadAdminVio();};
