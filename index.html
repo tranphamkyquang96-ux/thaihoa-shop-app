@@ -180,6 +180,12 @@ input[type=checkbox]{width:18px;height:18px;padding:0;border:none;border-radius:
 .kn-desc.show{display:block}
 .kn-none-wrap{border:2px solid #e8e8e4;border-radius:10px;padding:13px;margin-bottom:14px;background:#f9f9f7}
 .kn-none-wrap.checked{border-color:#1D9E75;background:#f0faf6}
+/* FILTER BAR */
+.filter-bar{display:flex;gap:6px;margin-bottom:12px}
+.filter-btn{padding:5px 14px;font-size:11px;border-radius:20px;border:1px solid #e8e8e4;background:#fff;cursor:pointer;color:#666;font-weight:600;font-family:inherit;white-space:nowrap}
+.filter-btn.active{background:#1a1a1a;color:#fff;border-color:#1a1a1a}
+/* SECTION LABEL */
+.form-section-label{font-size:11px;font-weight:700;color:#aaa;letter-spacing:0.5px;text-transform:uppercase;margin-bottom:8px;padding-top:4px}
 </style>
 </head>
 <body>
@@ -229,6 +235,7 @@ input[type=checkbox]{width:18px;height:18px;padding:0;border:none;border-radius:
   <div class="section-title">BÁO CÁO</div>
   <div class="mc" onclick="showSc('sc-vio-form')"><div class="mc-icon mc-red">⚠️</div><div class="mc-body"><div class="mc-title">Báo cáo sự cố / Vi phạm</div><div class="mc-sub">Ghi nhận vi phạm nhân viên, sự cố thiết bị</div></div><div class="mc-arr">›</div></div>
   <div class="mc" onclick="openKNForm()"><div class="mc-icon mc-red">😤</div><div class="mc-body"><div class="mc-title">Khiếu nại khách hàng</div><div class="mc-sub">Ghi nhận theo mức độ ưu tiên</div><div class="mc-badge badge-pending" id="badge-kn">Chưa báo cáo</div></div><div class="mc-arr">›</div></div>
+  <div class="mc" onclick="openMultiOrder('ca')"><div class="mc-icon mc-amber">📋</div><div class="mc-body"><div class="mc-title">Hàng nhập & Gợi ý mới</div><div class="mc-sub">Báo hàng sắp hết + gợi ý hàng nhập mới</div></div><div class="mc-arr">›</div></div>
 </div>
 
 <!-- CA CHECKLIST -->
@@ -259,6 +266,7 @@ input[type=checkbox]{width:18px;height:18px;padding:0;border:none;border-radius:
   <div style="height:8px"></div>
   <div class="section-title">ĐỀ XUẤT</div>
   <div class="mc" onclick="initOrderForm();showSc('sc-order-form')"><div class="mc-icon mc-green">➕</div><div class="mc-body"><div class="mc-title">Đề xuất nhập hàng</div><div class="mc-sub">Báo hàng cần nhập cho admin</div></div><div class="mc-arr">›</div></div>
+  <div class="mc" onclick="openMultiOrder('kho')"><div class="mc-icon mc-amber">📋</div><div class="mc-body"><div class="mc-title">Hàng nhập & Báo hết hàng</div><div class="mc-sub">Báo hết kệ + gợi ý hàng nhập mới</div></div><div class="mc-arr">›</div></div>
 </div>
 
 <!-- KHO CHECKLIST -->
@@ -356,6 +364,27 @@ input[type=checkbox]{width:18px;height:18px;padding:0;border:none;border-radius:
   </div>
 </div>
 
+<!-- HÀNG NHẬP & GỢI Ý MỚI (dùng chung cho ca + kho) -->
+<div class="screen" id="sc-multi-order">
+  <div class="hdr"><div class="hdr-row">
+    <button onclick="closeMultiOrder()" style="background:none;border:none;cursor:pointer;font-size:20px;color:#666;padding:0 10px 0 0;line-height:1">‹</button>
+    <div><div class="hdr-title" id="mo-title">Hàng nhập & Gợi ý</div><div class="hdr-sub" id="mo-sub"></div></div>
+  </div></div>
+  <div class="pad">
+    <div class="form-section-label">A. Hàng sắp hết / hết kệ</div>
+    <div class="info-box" style="margin-bottom:10px">Nhập tên hàng, số lượng hiện tại còn lại và trạng thái.</div>
+    <div id="mo-stock-rows"></div>
+    <button class="btn-add-row" onclick="addMOStockRow()">+ Thêm hàng sắp hết</button>
+    <div style="height:18px"></div>
+    <div class="form-section-label">B. Gợi ý hàng mới cần nhập</div>
+    <div class="info-box" style="margin-bottom:10px">Đề xuất mặt hàng chưa có hoặc cần tăng thêm, kèm lý do ngắn gọn.</div>
+    <div id="mo-new-rows"></div>
+    <button class="btn-add-row" onclick="addMONewRow()">+ Thêm gợi ý hàng mới</button>
+    <div style="height:18px"></div>
+    <button class="btn btn-green" onclick="submitMultiOrder()">📤 Gửi lên Admin</button>
+  </div>
+</div>
+
 <!-- ORDER FORM -->
 <div class="screen" id="sc-order-form">
   <div class="hdr"><div class="hdr-row">
@@ -375,7 +404,10 @@ input[type=checkbox]{width:18px;height:18px;padding:0;border:none;border-radius:
 <div class="screen" id="sc-admin">
   <div class="hdr"><div class="hdr-row">
     <div><div class="hdr-title">Thái Hoà — Admin</div><div class="hdr-sub" id="admin-date"></div></div>
-    <div class="chip"><div class="av av-admin">AD</div><span class="chip-name">Admin</span></div>
+    <div style="display:flex;align-items:center;gap:8px">
+      <button onclick="loadAdmin()" title="Tải lại dữ liệu" style="background:none;border:1px solid #e8e8e4;border-radius:8px;padding:5px 9px;cursor:pointer;font-size:17px;line-height:1;color:#555">🔄</button>
+      <div class="chip"><div class="av av-admin">AD</div><span class="chip-name">Admin</span></div>
+    </div>
   </div></div>
   <div class="tab-row">
     <button class="tab active" data-tab="bao-cao" onclick="switchTab(this,'bao-cao')">📋 Báo cáo</button>
@@ -385,8 +417,14 @@ input[type=checkbox]{width:18px;height:18px;padding:0;border:none;border-radius:
     <button class="tab" data-tab="cai-dat" onclick="switchTab(this,'cai-dat')">⚙️ Cài đặt</button>
   </div>
   <div class="tc active" id="tc-bao-cao"><div id="admin-reports-list"><div class="empty">Đang tải...</div></div></div>
-  <div class="tc" id="tc-su-co"><div id="admin-vio-list"><div class="empty">Đang tải...</div></div></div>
-  <div class="tc" id="tc-nhap-hang"><div id="admin-orders-list"><div class="empty">Đang tải...</div></div></div>
+  <div class="tc" id="tc-su-co">
+    <div class="filter-bar"><button class="filter-btn" id="vio-f-all" onclick="setVioFilter('all')">Tất cả</button><button class="filter-btn active" id="vio-f-pending" onclick="setVioFilter('pending')">Chờ xử lý</button></div>
+    <div id="admin-vio-list"><div class="empty">Đang tải...</div></div>
+  </div>
+  <div class="tc" id="tc-nhap-hang">
+    <div class="filter-bar"><button class="filter-btn active" id="ord-f-pending" onclick="setOrderFilter('pending')">Chờ xử lý</button><button class="filter-btn" id="ord-f-all" onclick="setOrderFilter('all')">Tất cả lịch sử</button></div>
+    <div id="admin-orders-list"><div class="empty">Đang tải...</div></div>
+  </div>
   <div class="tc" id="tc-tong-ket"><div id="admin-summary-list"><div class="empty">Đang tính...</div></div></div>
   <div class="tc" id="tc-cai-dat">
     <div class="card"><div style="font-size:13px;font-weight:700;margin-bottom:12px">🔐 Quản lý PIN nhân viên</div><div id="admin-pin-list"></div></div>
@@ -546,6 +584,9 @@ let CU = null, CP = "", users = {};
 let curCaType = null, curKhoType = null, curThuType = null;
 let caChk = {}, khoChk = {}, thuChk = {};
 let editPinUid = null;
+let multiOrderOpener = 'ca';
+let orderFilter = 'pending';
+let vioFilter = 'pending';
 
 // ── HELPERS ─────────────────────────────────────────────────────
 const today   = () => new Date().toISOString().split('T')[0];
@@ -846,6 +887,60 @@ window.submitKN = async () => {
   }catch(e){alert('Lỗi: '+e.message);}
 };
 
+// ── MULTI ORDER (CA + KHO) ───────────────────────────────────────
+window.openMultiOrder = opener => {
+  multiOrderOpener=opener;
+  const isKho=opener==='kho';
+  document.getElementById('mo-title').textContent=isKho?'Hàng nhập & Báo hết hàng':'Hàng nhập & Gợi ý mới';
+  document.getElementById('mo-sub').textContent=dateVN()+' · '+users[CU].name;
+  document.getElementById('mo-stock-rows').innerHTML='';
+  document.getElementById('mo-new-rows').innerHTML='';
+  addMOStockRow(); addMONewRow();
+  showSc('sc-multi-order');
+};
+window.closeMultiOrder = () => showSc(multiOrderOpener==='ca'?'sc-ca-menu':'sc-kho-menu');
+window.addMOStockRow = () => {
+  const d=document.createElement('div'); d.className='order-row';
+  d.innerHTML=`<input type="text" placeholder="Tên hàng..."><input type="text" inputmode="numeric" class="qty" placeholder="SL còn"><select><option value="sap_het">🟡 Sắp hết</option><option value="het_kel">🟠 Hết kệ</option><option value="het_kho">🔴 Hết kho</option></select><button class="btn-rm" onclick="this.parentElement.remove()">×</button>`;
+  document.getElementById('mo-stock-rows').appendChild(d);
+};
+window.addMONewRow = () => {
+  const d=document.createElement('div'); d.className='order-row';
+  d.innerHTML=`<input type="text" placeholder="Tên hàng mới..."><input type="text" class="qty" placeholder="Lý do..." style="min-width:80px"><select style="min-width:110px"><option value="cao">🔴 Ưu tiên cao</option><option value="trung_binh">🟡 Trung bình</option><option value="thap">⚫ Thấp</option></select><button class="btn-rm" onclick="this.parentElement.remove()">×</button>`;
+  document.getElementById('mo-new-rows').appendChild(d);
+};
+window.submitMultiOrder = async () => {
+  const stockItems=[], newItems=[];
+  document.querySelectorAll('#mo-stock-rows .order-row').forEach(r=>{
+    const ins=r.querySelectorAll('input'),sel=r.querySelector('select');
+    if(ins[0].value.trim())stockItems.push({name:ins[0].value.trim(),qty:ins[1].value.trim()||'?',status:sel.value});
+  });
+  document.querySelectorAll('#mo-new-rows .order-row').forEach(r=>{
+    const ins=r.querySelectorAll('input'),sel=r.querySelector('select');
+    if(ins[0].value.trim())newItems.push({name:ins[0].value.trim(),reason:ins[1].value.trim(),priority:sel.value});
+  });
+  if(!stockItems.length&&!newItems.length){alert('Vui lòng nhập ít nhất 1 mặt hàng!');return;}
+  try{
+    await push(ref(db,'multi_orders'),{stockItems,newItems,reporterUid:CU,reporterName:users[CU].name,reporterRole:users[CU].role,date:today(),time:timeNow(),status:'pending',submittedAt:new Date().toISOString()});
+    alert('✅ Đã gửi đề xuất!');
+    closeMultiOrder();
+  }catch(e){alert('Lỗi: '+e.message);}
+};
+
+// ── FILTER HELPERS ───────────────────────────────────────────────
+window.setVioFilter = f => {
+  vioFilter=f;
+  document.getElementById('vio-f-pending').classList.toggle('active',f==='pending');
+  document.getElementById('vio-f-all').classList.toggle('active',f==='all');
+  loadAdminVio();
+};
+window.setOrderFilter = f => {
+  orderFilter=f;
+  document.getElementById('ord-f-pending').classList.toggle('active',f==='pending');
+  document.getElementById('ord-f-all').classList.toggle('active',f==='all');
+  loadAdminOrders();
+};
+
 // ── ORDER FORM ──────────────────────────────────────────────────
 window.initOrderForm = () => { document.getElementById('order-rows').innerHTML=''; addOrderRow(); };
 window.addOrderRow = () => {
@@ -923,10 +1018,14 @@ async function loadAdminVio(){
       });
     }
     if(!all.length){c.innerHTML='<div class="empty">Không có sự cố nào</div>';return;}
-    all.sort((a,b)=>(b.v.submittedAt||'').localeCompare(a.v.submittedAt||''));
+    const filtered=vioFilter==='pending'
+      ?all.filter(({v,kind})=>kind==='vio'?v.status==='pending':(v.levels&&v.levels.length>0&&!v.noComplaints))
+      :all;
+    if(!filtered.length){c.innerHTML='<div class="empty">Không có sự cố đang chờ xử lý</div>';return;}
+    filtered.sort((a,b)=>(b.v.submittedAt||'').localeCompare(a.v.submittedAt||''));
     const tmap={violation:'⚠️ Vi phạm',complaint:'😤 Khiếu nại',incident:'🔧 Sự cố'};
     const lvmap={do:'🔴 Khẩn cấp',vang:'🟡 Trong ca',xam:'⚫ Cuối ngày'};
-    c.innerHTML=all.map(({id,v,kind})=>{
+    c.innerHTML=filtered.map(({id,v,kind})=>{
       if(kind==='vio'){
         return`<div class="vio-item">
           <div class="vio-top"><div><div class="vio-name">${tmap[v.type]||v.type}</div><div class="vio-meta">👤 ${v.reporterName} · ${v.date} ${v.time||''}</div>${v.nvName&&v.nvName!=='Không có'?`<div class="vio-meta">Liên quan: <b>${v.nvName}</b></div>`:''}<div class="vio-meta" style="color:#444;margin-top:4px">${v.desc}</div></div><span class="status-badge ${v.status==='pending'?'sb-pending':v.status==='approved'?'sb-approved':'sb-rejected'}">${v.status==='pending'?'Chờ duyệt':v.status==='approved'?'Ghi nhận':'Bỏ qua'}</span></div>
@@ -952,18 +1051,43 @@ window.handleVio=async(id,status)=>{await update(ref(db,`violations/${id}`),{sta
 async function loadAdminOrders(){
   const c=document.getElementById('admin-orders-list');
   try{
-    const snap=await get(ref(db,'orders'));
-    if(!snap.exists()){c.innerHTML='<div class="empty">Không có đề xuất nào</div>';return;}
-    const items=Object.entries(snap.val()).filter(([,o])=>o.status==='pending').sort((a,b)=>(b[1].submittedAt||'').localeCompare(a[1].submittedAt||''));
-    if(!items.length){c.innerHTML='<div class="empty">Không có đề xuất đang chờ ✅</div>';return;}
+    const [oSnap,moSnap]=await Promise.all([get(ref(db,'orders')),get(ref(db,'multi_orders'))]);
+    const all=[];
+    if(oSnap.exists()) Object.entries(oSnap.val()).forEach(([id,o])=>all.push({id,o,kind:'order'}));
+    if(moSnap.exists()) Object.entries(moSnap.val()).forEach(([id,o])=>all.push({id,o,kind:'multi'}));
+    if(!all.length){c.innerHTML='<div class="empty">Không có đề xuất nào</div>';return;}
+    const filtered=orderFilter==='pending'?all.filter(({o})=>o.status==='pending'):all;
+    if(!filtered.length){c.innerHTML='<div class="empty">Không có đề xuất đang chờ ✅</div>';return;}
+    filtered.sort((a,b)=>(b.o.submittedAt||'').localeCompare(a.o.submittedAt||''));
     const smap={sap_het:'🟡 Sắp hết',het_kel:'🟠 Hết kệ',het_kho:'🔴 Hết kho'};
-    c.innerHTML=items.map(([id,o])=>`<div class="vio-item">
-      <div class="vio-top"><div><div class="vio-name">📦 Đề xuất nhập hàng</div><div class="vio-meta">👤 ${o.reporterName} · ${o.date} ${o.time||''}</div></div><button class="btn-sm" onclick="doneOrder('${id}')" style="color:#1D9E75;border-color:#1D9E75">Đã xử lý ✓</button></div>
-      <div style="margin-top:8px">${o.items.map(i=>`<div class="rep-meta">• ${i.name} — SL: ${i.qty} · ${smap[i.status]||i.status}</div>`).join('')}</div>
-    </div>`).join('');
+    const pmap={cao:'🔴 Cao',trung_binh:'🟡 TB',thap:'⚫ Thấp'};
+    c.innerHTML=filtered.map(({id,o,kind})=>{
+      const isDone=o.status==='done';
+      const actionBtn=isDone
+        ?'<span class="status-badge sb-approved">✓ Đã xử lý</span>'
+        :`<button class="btn-sm" onclick="doneOrder('${id}','${kind}')" style="color:#1D9E75;border-color:#1D9E75">Đã xử lý ✓</button>`;
+      if(kind==='order'){
+        return`<div class="vio-item">
+          <div class="vio-top"><div><div class="vio-name">📦 Đề xuất nhập hàng</div><div class="vio-meta">👤 ${o.reporterName} · ${o.date} ${o.time||''}</div></div>${actionBtn}</div>
+          <div style="margin-top:8px">${(o.items||[]).map(i=>`<div class="rep-meta">• ${i.name} — SL: ${i.qty} · ${smap[i.status]||i.status}</div>`).join('')}</div>
+        </div>`;
+      }
+      const roleLabel=o.reporterRole==='truong_ca'?'Trưởng ca':'Trưởng kho';
+      const stockHtml=(o.stockItems||[]).map(i=>`<div class="rep-meta">• ${i.name} — SL: ${i.qty} · ${smap[i.status]||i.status}</div>`).join('');
+      const newHtml=(o.newItems||[]).map(i=>`<div class="rep-meta">✨ ${i.name}${i.reason?' — '+i.reason:''} · ${pmap[i.priority]||i.priority}</div>`).join('');
+      return`<div class="vio-item">
+        <div class="vio-top"><div><div class="vio-name">📋 Hàng nhập & Gợi ý — ${roleLabel}</div><div class="vio-meta">👤 ${o.reporterName} · ${o.date} ${o.time||''}</div></div>${actionBtn}</div>
+        ${stockHtml?`<div style="margin-top:8px"><div class="rep-meta" style="font-weight:700;color:#555;margin-bottom:3px">Hàng sắp hết:</div>${stockHtml}</div>`:''}
+        ${newHtml?`<div style="margin-top:6px"><div class="rep-meta" style="font-weight:700;color:#555;margin-bottom:3px">Gợi ý hàng mới:</div>${newHtml}</div>`:''}
+      </div>`;
+    }).join('');
   }catch(e){c.innerHTML=`<div class="empty">Lỗi: ${e.message}</div>`;}
 }
-window.doneOrder=async id=>{await update(ref(db,`orders/${id}`),{status:'done'});loadAdminOrders();};
+window.doneOrder=async(id,kind='order')=>{
+  const path=kind==='multi'?`multi_orders/${id}`:`orders/${id}`;
+  await update(ref(db,path),{status:'done'});
+  loadAdminOrders();
+};
 
 async function loadAdminSummary(){
   const c=document.getElementById('admin-summary-list');
