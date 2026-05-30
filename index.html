@@ -212,7 +212,8 @@ input[type=checkbox]{width:18px;height:18px;padding:0;border:none;border-radius:
   </div>
   <div class="pad" style="padding-top:0">
     <div class="login-card">
-      <div style="margin-bottom:14px"><label>Chọn nhân viên</label><select id="sel-user"><option value="">-- Chọn tên --</option></select></div>
+      <div style="margin-bottom:14px"><label>Chọn nhân viên</label><select id="sel-user" onchange="onUserChange()"><option value="">-- Chọn tên --</option></select></div>
+      <div id="admin-secret-wrap" style="display:none;margin-bottom:14px"><label>Mật khẩu Admin</label><input type="password" id="admin-secret" maxlength="20" placeholder="Mật khẩu riêng của Admin" autocomplete="new-password"></div>
       <div class="pin-disp" id="pin-disp">────</div>
       <div class="pin-grid">
         <button class="pb" onclick="pp('1')">1</button><button class="pb" onclick="pp('2')">2</button><button class="pb" onclick="pp('3')">3</button>
@@ -584,7 +585,11 @@ const DEF_USERS = {
 };
 
 // ── STATE ───────────────────────────────────────────────────────
+const ADMIN_SECRET = 'TH@2026';
+const MAX_ATTEMPTS = 5;
+const LOCK_MS = 15 * 60 * 1000;
 let CU = null, CP = "", users = {};
+let pinAttempts = 0, lockUntil = 0, lockTimer = null;
 let curCaType = null, curKhoType = null, curThuType = null;
 let caChk = {}, khoChk = {}, thuChk = {};
 let editPinUid = null;
@@ -635,7 +640,28 @@ function setNav(id) {
 }
 
 // ── LOGIN ───────────────────────────────────────────────────────
+function showLockCountdown() {
+  if (lockTimer) clearInterval(lockTimer);
+  const errEl = document.getElementById('login-err');
+  const update = () => {
+    const rem = lockUntil - Date.now();
+    if (rem <= 0) { clearInterval(lockTimer); lockTimer=null; errEl.textContent=''; return; }
+    const m = Math.floor(rem/60000), s = Math.ceil((rem%60000)/1000);
+    let msg = '🔒 Thử lại sau ';
+    if (m > 0) msg += m + ' phút';
+    if (s > 0) msg += (m > 0 ? ' ' : '') + s + ' giây';
+    errEl.textContent = msg;
+  };
+  update(); lockTimer = setInterval(update, 1000);
+}
+window.onUserChange = () => {
+  const uid = document.getElementById('sel-user').value;
+  document.getElementById('admin-secret-wrap').style.display = uid==='admin' ? 'block' : 'none';
+  CP=''; document.getElementById('pin-disp').textContent='────';
+  document.getElementById('login-err').textContent='';
+};
 window.pp = v => {
+  if (Date.now() < lockUntil) return;
   if (v==='del') CP = CP.slice(0,-1);
   else if (CP.length<4) CP += v;
   document.getElementById('pin-disp').textContent = '●'.repeat(CP.length).padEnd(4,'─');
@@ -644,13 +670,33 @@ window.pp = v => {
 window.doLogin = () => {
   const uid = document.getElementById('sel-user').value;
   if (!uid) { document.getElementById('login-err').textContent='Vui lòng chọn tên nhân viên'; return; }
+  if (Date.now() < lockUntil) { showLockCountdown(); return; }
   if (CP.length<4) { document.getElementById('login-err').textContent='Vui lòng nhập đủ 4 số PIN'; return; }
-  if (!users[uid] || users[uid].pin !== CP) {
-    document.getElementById('login-err').textContent='❌ PIN không đúng, thử lại!';
-    CP=''; document.getElementById('pin-disp').textContent='────'; return;
+  const errEl = document.getElementById('login-err');
+  const resetPin = () => { CP=''; document.getElementById('pin-disp').textContent='────'; };
+  const recordFail = msg => {
+    pinAttempts++;
+    if (pinAttempts >= MAX_ATTEMPTS) {
+      lockUntil = Date.now() + LOCK_MS; pinAttempts=0; resetPin();
+      document.getElementById('admin-secret').value='';
+      showLockCountdown();
+    } else {
+      errEl.textContent = msg + ` — còn ${MAX_ATTEMPTS - pinAttempts} lần thử!`; resetPin();
+    }
+  };
+  if (!users[uid] || users[uid].pin !== CP) { recordFail('❌ PIN không đúng'); return; }
+  if (uid === 'admin') {
+    const secret = document.getElementById('admin-secret').value;
+    if (secret !== ADMIN_SECRET) {
+      document.getElementById('admin-secret').value='';
+      recordFail('❌ Mật khẩu Admin không đúng');
+      return;
+    }
+    document.getElementById('admin-secret').value='';
   }
-  CU=uid; CP='';
-  document.getElementById('login-err').textContent='';
+  pinAttempts=0; lockUntil=0;
+  if (lockTimer) { clearInterval(lockTimer); lockTimer=null; }
+  CU=uid; CP=''; errEl.textContent='';
   document.getElementById('pin-disp').textContent='────';
   document.getElementById('bnav').style.display='flex';
   navHome();
@@ -678,6 +724,8 @@ window.doLogout = () => {
   document.getElementById('sel-user').value='';
   document.getElementById('pin-disp').textContent='────';
   document.getElementById('login-err').textContent='';
+  document.getElementById('admin-secret').value='';
+  document.getElementById('admin-secret-wrap').style.display='none';
   showSc('sc-login');
 };
 
@@ -1150,8 +1198,13 @@ async function loadAdminSummary(){
 function loadAdminPins(){
   const rmap={admin:'Admin',truong_ca:'Trưởng ca',truong_kho:'Trưởng kho',thu_ngan:'Thu ngân'};
   const tmap={admin:'rt-admin',truong_ca:'rt-ca',truong_kho:'rt-kho',thu_ngan:'rt-thu'};
-  document.getElementById('admin-pin-list').innerHTML=Object.entries(users).map(([uid,u])=>`<div class="pin-item"><div><div class="pi-name">${u.name}</div><div class="pi-role"><span class="role-tag ${tmap[u.role]}">${rmap[u.role]||u.role}</span></div></div><div style="display:flex;align-items:center;gap:8px"><span style="font-size:12px;color:#999;font-family:monospace">PIN: ${u.pin}</span><button class="btn-sm" onclick="openPinModal('${uid}')">Đổi PIN</button></div></div>`).join('');
+  document.getElementById('admin-pin-list').innerHTML=Object.entries(users).map(([uid,u])=>`<div class="pin-item"><div><div class="pi-name">${u.name}</div><div class="pi-role"><span class="role-tag ${tmap[u.role]}">${rmap[u.role]||u.role}</span></div></div><div style="display:flex;align-items:center;gap:8px"><span style="font-size:12px;color:#999;font-family:monospace" id="pin-disp-${uid}" data-pin="${u.pin}" data-visible="0">PIN: ****</span><button class="btn-sm" onclick="togglePinVisible('${uid}')">👁 Hiện</button><button class="btn-sm" onclick="openPinModal('${uid}')">Đổi PIN</button></div></div>`).join('');
 }
+window.togglePinVisible = uid => {
+  const el = document.getElementById('pin-disp-'+uid); if(!el)return;
+  if(el.dataset.visible==='1'){el.textContent='PIN: ****';el.dataset.visible='0';}
+  else{el.textContent='PIN: '+el.dataset.pin;el.dataset.visible='1';}
+};
 
 window.switchTab=(el,tabId)=>{
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
