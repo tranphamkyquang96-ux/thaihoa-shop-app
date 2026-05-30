@@ -610,13 +610,16 @@ const fmtSec  = s => { const m=Math.floor(s/60),sec=s%60; return m>0?(sec>0?`${m
 async function init() {
   showSc('sc-loading');
   try {
-    await signInAnonymously(auth);
+    const cred = await signInAnonymously(auth);
+    console.log('[Auth] signInAnonymously OK:', cred);
+    console.log('[Auth] currentUser:', auth.currentUser);
+    console.log('[Auth] uid:', auth.currentUser?.uid);
     const snap = await get(ref(db,'config/users'));
     users = snap.exists() ? snap.val() : DEF_USERS;
     if (!snap.exists()) await set(ref(db,'config/users'), DEF_USERS);
   } catch(e) {
-    users = DEF_USERS;
-    console.warn('Firebase chưa kết nối, dùng dữ liệu mẫu:', e.message);
+    console.error('[Auth] FAIL:', e.code, e.message);
+    throw e;
   }
   buildSel(); populateVioNV(); showSc('sc-login');
 }
